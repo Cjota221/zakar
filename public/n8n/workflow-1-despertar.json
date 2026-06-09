@@ -1,0 +1,204 @@
+{
+  "name": "ZAKAR — Workflow 1: Despertar das 05:00",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Cron 05:00 Brasília",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * *" }]
+        }
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Buscar Usuários Ativos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/user_profiles",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "id,name,life_stage,timezone" },
+            { "name": "plan", "value": "neq.deleted" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Para Cada Usuário",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [680, 300],
+      "parameters": { "batchSize": 1, "options": {} }
+    },
+    {
+      "id": "n4",
+      "name": "Buscar Memória do Usuário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/buscar_memoria_usuario",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ p_user_id: $json.id, p_limit: 5 }) }}"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Buscar Tema da Semana",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/weekly_themes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select", "value": "theme_name,description" },
+            { "name": "is_active", "value": "eq.true" },
+            { "name": "limit", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Montar Prompt do Despertar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300],
+      "parameters": {
+        "jsCode": "const usuario = $('Para Cada Usuário').item.json;\nconst memorias = $('Buscar Memória do Usuário').all().map(m => m.json.content).filter(Boolean).join('\\n- ');\nconst tema = $('Buscar Tema da Semana').first().json;\nconst dataHoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n\nconst prompt = `Você é o Zakar, o agente do devocional matinal.\\n\\nSua missão é gerar uma palavra personalizada e poderosa para ${usuario.name} hoje, ${dataHoje}.\\n\\nTEMA DA SEMANA: ${tema.theme_name} — ${tema.description}\\n\\nCONTEXTO DO USUÁRIO:\\n- Nome: ${usuario.name}\\n- Momento de vida: ${usuario.life_stage}\\n- Fragmentos de memória recentes:\\n- ${memorias || 'Usuário novo, sem histórico ainda.'}\\n\\nINSTRUÇÕES:\\n1. Escolha UM versículo (NVI) precisamente relevante para o momento do usuário e tema da semana.\\n2. Escreva uma palavra de 180-220 palavras: comece direto (NUNCA com Bom dia genérico), conecte o versículo com a realidade do usuário.\\n3. Uma pergunta de reflexão (1 linha).\\n4. Uma ação prática para o dia (1 linha, algo pequeno e concreto).\\n\\nRESPONDA APENAS com JSON válido, sem markdown:\\n{\\n  \"verse_reference\": \"Livro Cap:Ver\",\\n  \"verse_text\": \"texto do versículo (NVI)\",\\n  \"content\": \"palavra completa\",\\n  \"reflection_question\": \"pergunta\",\\n  \"action_of_day\": \"ação\"\\n}`;\n\nreturn { user_id: usuario.id, user_name: usuario.name, prompt };"
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Chamar Groq API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'llama3-70b-8192', messages: [{ role: 'user', content: $json.prompt }], temperature: 0.85, max_tokens: 1000, response_format: { type: 'json_object' } }) }}"
+      }
+    },
+    {
+      "id": "n8",
+      "name": "Parsear Resposta da IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300],
+      "parameters": {
+        "jsCode": "const resposta = $json.choices[0].message.content;\nlet devocional;\ntry {\n  devocional = JSON.parse(resposta);\n} catch (e) {\n  console.error('Erro ao parsear IA:', resposta);\n  return null;\n}\nconst userId = $('Montar Prompt do Despertar').item.json.user_id;\nconst hoje = new Date().toISOString().split('T')[0];\nreturn {\n  user_id: userId,\n  date: hoje,\n  verse_reference: devocional.verse_reference,\n  verse_text: devocional.verse_text,\n  content: devocional.content,\n  reflection_question: devocional.reflection_question,\n  action_of_day: devocional.action_of_day,\n  agent_used: 'despertar'\n};"
+      }
+    },
+    {
+      "id": "n9",
+      "name": "Salvar Devocional",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2000, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/devotionals",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=merge-duplicates" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}"
+      }
+    },
+    {
+      "id": "n10",
+      "name": "Atualizar Streak",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2220, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/atualizar_streak",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ p_user_id: $('Parsear Resposta da IA').item.json.user_id }) }}"
+      }
+    }
+  ],
+  "connections": {
+    "Cron 05:00 Brasília": { "main": [[{ "node": "Buscar Usuários Ativos", "type": "main", "index": 0 }]] },
+    "Buscar Usuários Ativos": { "main": [[{ "node": "Para Cada Usuário", "type": "main", "index": 0 }]] },
+    "Para Cada Usuário": { "main": [[{ "node": "Buscar Memória do Usuário", "type": "main", "index": 0 }]] },
+    "Buscar Memória do Usuário": { "main": [[{ "node": "Buscar Tema da Semana", "type": "main", "index": 0 }]] },
+    "Buscar Tema da Semana": { "main": [[{ "node": "Montar Prompt do Despertar", "type": "main", "index": 0 }]] },
+    "Montar Prompt do Despertar": { "main": [[{ "node": "Chamar Groq API", "type": "main", "index": 0 }]] },
+    "Chamar Groq API": { "main": [[{ "node": "Parsear Resposta da IA", "type": "main", "index": 0 }]] },
+    "Parsear Resposta da IA": { "main": [[{ "node": "Salvar Devocional", "type": "main", "index": 0 }]] },
+    "Salvar Devocional": { "main": [[{ "node": "Atualizar Streak", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "id": "zakar-despertar-01",
+  "tags": []
+}

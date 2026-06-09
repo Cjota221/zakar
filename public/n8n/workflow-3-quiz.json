@@ -1,0 +1,120 @@
+{
+  "name": "ZAKAR — Workflow 3: Processamento de Quiz",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Webhook Quiz",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "path": "zakar-quiz",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Calcular Score e XP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "jsCode": "const { user_id, journey_day_id, questions } = $json.body;\nconst total = questions.length;\nconst acertos = questions.filter(q => q.user_answer === q.correct).length;\nconst score = Math.round((acertos / total) * 100);\n\nlet xp = 0;\nif (score === 100) xp = 35;\nelse if (score >= 70) xp = 20;\nelse if (score >= 50) xp = 10;\nelse xp = 5;\n\nreturn { user_id, journey_day_id, questions, score, xp_earned: xp, acertos, total };"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Salvar Resultado do Quiz",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/quiz_results",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ user_id: $json.user_id, journey_day_id: $json.journey_day_id, questions: $json.questions, score: $json.score, xp_earned: $json.xp_earned }) }}"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Adicionar XP ao Perfil",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/adicionar_xp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ p_user_id: $('Calcular Score e XP').item.json.user_id, p_xp: $('Calcular Score e XP').item.json.xp_earned }) }}"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Gerar Feedback da IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.GROQ_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: 'O usuário acertou ' + $('Calcular Score e XP').item.json.acertos + ' de ' + $('Calcular Score e XP').item.json.total + ' questões (' + $('Calcular Score e XP').item.json.score + '%) e ganhou ' + $('Calcular Score e XP').item.json.xp_earned + ' XP.\\n\\nEscreva um feedback curto (máx 3 linhas):\\n- Se >= 70%: comemore com entusiasmo\\n- Se < 70%: encoraje sem humilhar\\n- Mencione os XP ganhos\\n- Tom caloroso e próximo\\n- Termine com frase bíblica motivacional\\n- Máx 2 emojis' }], temperature: 0.8, max_tokens: 150 }) }}"
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Retornar Feedback",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1340, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { score: $('Calcular Score e XP').item.json.score, xp_earned: $('Calcular Score e XP').item.json.xp_earned, acertos: $('Calcular Score e XP').item.json.acertos, total: $('Calcular Score e XP').item.json.total, feedback: $('Gerar Feedback da IA').item.json.choices[0].message.content } }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Quiz": { "main": [[{ "node": "Calcular Score e XP", "type": "main", "index": 0 }]] },
+    "Calcular Score e XP": { "main": [[{ "node": "Salvar Resultado do Quiz", "type": "main", "index": 0 }]] },
+    "Salvar Resultado do Quiz": { "main": [[{ "node": "Adicionar XP ao Perfil", "type": "main", "index": 0 }]] },
+    "Adicionar XP ao Perfil": { "main": [[{ "node": "Gerar Feedback da IA", "type": "main", "index": 0 }]] },
+    "Gerar Feedback da IA": { "main": [[{ "node": "Retornar Feedback", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "id": "zakar-quiz-03",
+  "tags": []
+}
