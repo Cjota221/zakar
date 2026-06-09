@@ -1,0 +1,707 @@
+{
+  "workflows": [
+    {
+      "name": "ZAKAR — Workflow 1: Despertar das 05:00",
+      "description": "Roda todo dia às 05:00 (Brasília). Busca usuários ativos, monta prompt com memória, chama Groq, salva devocional na tabela devotionals.",
+      "nodes": [
+        {
+          "id": "1",
+          "name": "Cron 05:00 Brasília",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "position": [240, 300],
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "cronExpression",
+                  "expression": "0 8 * * *"
+                }
+              ]
+            }
+          },
+          "notes": "05:00 Brasília = 08:00 UTC. Ajuste se seu servidor estiver em outro fuso."
+        },
+        {
+          "id": "2",
+          "name": "Buscar Usuários Ativos",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [460, 300],
+          "parameters": {
+            "method": "GET",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/user_profiles",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendQuery": true,
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "select",
+                  "value": "id,name,life_stage,font_scale,timezone"
+                },
+                {
+                  "name": "plan",
+                  "value": "neq.deleted"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "3",
+          "name": "Para Cada Usuário",
+          "type": "n8n-nodes-base.splitInBatches",
+          "position": [680, 300],
+          "parameters": {
+            "batchSize": 1,
+            "options": {}
+          }
+        },
+        {
+          "id": "4",
+          "name": "Buscar Memória do Usuário",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [900, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/buscar_memoria_usuario",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "parameters": [
+                {
+                  "name": "p_user_id",
+                  "value": "={{ $json.id }}"
+                },
+                {
+                  "name": "p_limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "notes": "Chama função SQL que retorna os 5 fragmentos de memória mais recentes do usuário."
+        },
+        {
+          "id": "5",
+          "name": "Buscar Tema da Semana",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [1120, 300],
+          "parameters": {
+            "method": "GET",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/weekly_themes",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                }
+              ]
+            },
+            "sendQuery": true,
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "select",
+                  "value": "theme_name,description"
+                },
+                {
+                  "name": "is_active",
+                  "value": "eq.true"
+                },
+                {
+                  "name": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "Montar Prompt do Despertar",
+          "type": "n8n-nodes-base.code",
+          "position": [1340, 300],
+          "parameters": {
+            "jsCode": "// Pega os dados dos nós anteriores\nconst usuario = $('Para Cada Usuário').item.json;\nconst memorias = $('Buscar Memória do Usuário').all().map(m => m.json.content).join('\\n- ');\nconst tema = $('Buscar Tema da Semana').first().json;\nconst dataHoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });\n\nconst prompt = `Você é o Zakar, o agente do devocional matinal.\n\nSua missão é gerar uma palavra personalizada, poderosa e cirúrgica para ${usuario.name} hoje, ${dataHoje}.\n\nTEMA DA SEMANA: ${tema.theme_name} — ${tema.description}\n\nCONTEXTO DO USUÁRIO:\n- Nome: ${usuario.name}\n- Momento de vida: ${usuario.life_stage}\n- Fragmentos de memória recentes:\n- ${memorias || 'Usuário novo, sem histórico ainda.'}\n\nINSTRUÇÕES:\n1. Escolha UM versículo (NVI) que seja precisamente relevante para o momento de vida do usuário e para o tema da semana. Não use versículos genéricos como João 3:16 ou Jeremias 29:11 a não ser que sejam realmente os mais precisos.\n2. Escreva uma palavra de 180-220 palavras que:\n   - Comece direto, NUNCA com \"Bom dia!\" genérico\n   - Conecte o versículo com a situação real do usuário usando os fragmentos de memória\n   - Use linguagem simples, próxima, como um amigo de confiança\n3. Escreva uma pergunta de reflexão (1 linha)\n4. Escreva uma ação prática para o dia (1 linha, algo pequeno e concreto)\n\nRESPONDA APENAS com um JSON válido, sem markdown, sem explicações:\n{\n  \"verse_reference\": \"Livro Cap:Ver\",\n  \"verse_text\": \"texto completo do versículo (NVI)\",\n  \"content\": \"palavra completa aqui\",\n  \"reflection_question\": \"pergunta aqui\",\n  \"action_of_day\": \"ação aqui\"\n}`;\n\nreturn {\n  user_id: usuario.id,\n  user_name: usuario.name,\n  prompt: prompt\n};"
+          }
+        },
+        {
+          "id": "7",
+          "name": "Chamar Groq API",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [1560, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.groq.com/openai/v1/chat/completions",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.GROQ_API_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"model\": \"llama3-70b-8192\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.prompt }}\"\n    }\n  ],\n  \"temperature\": 0.85,\n  \"max_tokens\": 1000,\n  \"response_format\": { \"type\": \"json_object\" }\n}"
+          }
+        },
+        {
+          "id": "8",
+          "name": "Parsear Resposta da IA",
+          "type": "n8n-nodes-base.code",
+          "position": [1780, 300],
+          "parameters": {
+            "jsCode": "const resposta = $json.choices[0].message.content;\nlet devocional;\n\ntry {\n  devocional = JSON.parse(resposta);\n} catch (e) {\n  // Se a IA retornou algo fora do JSON, loga e pula esse usuário\n  console.error('Erro ao parsear resposta da IA:', resposta);\n  return null;\n}\n\nconst userId = $('Montar Prompt do Despertar').item.json.user_id;\nconst hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD\n\nreturn {\n  user_id: userId,\n  date: hoje,\n  verse_reference: devocional.verse_reference,\n  verse_text: devocional.verse_text,\n  content: devocional.content,\n  reflection_question: devocional.reflection_question,\n  action_of_day: devocional.action_of_day,\n  agent_used: 'despertar'\n};"
+          }
+        },
+        {
+          "id": "9",
+          "name": "Salvar Devocional no Supabase",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [2000, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/devotionals",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Prefer",
+                  "value": "resolution=merge-duplicates"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={{ JSON.stringify($json) }}"
+          },
+          "notes": "O header Prefer:resolution=merge-duplicates evita duplicatas se o workflow rodar duas vezes no mesmo dia (UPSERT)."
+        },
+        {
+          "id": "10",
+          "name": "Atualizar Streak do Usuário",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [2220, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/atualizar_streak",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={ \"p_user_id\": \"{{ $('Parsear Resposta da IA').item.json.user_id }}\" }"
+          }
+        },
+        {
+          "id": "11",
+          "name": "Log de Execução",
+          "type": "n8n-nodes-base.code",
+          "position": [2440, 300],
+          "parameters": {
+            "jsCode": "const userId = $('Parsear Resposta da IA').item.json.user_id;\nconst versiculo = $('Parsear Resposta da IA').item.json.verse_reference;\nconsole.log(`✅ Despertar gerado para usuário ${userId} — ${versiculo}`);\nreturn { status: 'ok', user_id: userId, verse: versiculo };"
+          }
+        }
+      ],
+      "connections": {
+        "Cron 05:00 Brasília": { "main": [[{ "node": "Buscar Usuários Ativos", "type": "main", "index": 0 }]] },
+        "Buscar Usuários Ativos": { "main": [[{ "node": "Para Cada Usuário", "type": "main", "index": 0 }]] },
+        "Para Cada Usuário": { "main": [[{ "node": "Buscar Memória do Usuário", "type": "main", "index": 0 }]] },
+        "Buscar Memória do Usuário": { "main": [[{ "node": "Buscar Tema da Semana", "type": "main", "index": 0 }]] },
+        "Buscar Tema da Semana": { "main": [[{ "node": "Montar Prompt do Despertar", "type": "main", "index": 0 }]] },
+        "Montar Prompt do Despertar": { "main": [[{ "node": "Chamar Groq API", "type": "main", "index": 0 }]] },
+        "Chamar Groq API": { "main": [[{ "node": "Parsear Resposta da IA", "type": "main", "index": 0 }]] },
+        "Parsear Resposta da IA": { "main": [[{ "node": "Salvar Devocional no Supabase", "type": "main", "index": 0 }]] },
+        "Salvar Devocional no Supabase": { "main": [[{ "node": "Atualizar Streak do Usuário", "type": "main", "index": 0 }]] },
+        "Atualizar Streak do Usuário": { "main": [[{ "node": "Log de Execução", "type": "main", "index": 0 }]] }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "timezone": "America/Sao_Paulo"
+      },
+      "variables_needed": {
+        "ZAKAR_SUPABASE_URL": "URL do projeto Supabase do Zakar — ex: https://xyzxyz.supabase.co",
+        "ZAKAR_SUPABASE_SERVICE_KEY": "service_role key do Supabase do Zakar (não a anon key)",
+        "GROQ_API_KEY": "Chave da API do Groq — console.groq.com"
+      },
+      "sql_functions_needed": [
+        {
+          "name": "buscar_memoria_usuario",
+          "sql": "CREATE OR REPLACE FUNCTION buscar_memoria_usuario(p_user_id UUID, p_limit INT DEFAULT 5)\nRETURNS TABLE(content TEXT) AS $$\nBEGIN\n  RETURN QUERY\n  SELECT mf.content\n  FROM memory_fragments mf\n  WHERE mf.user_id = p_user_id\n  ORDER BY mf.created_at DESC\n  LIMIT p_limit;\nEND;\n$$ LANGUAGE plpgsql SECURITY DEFINER;"
+        },
+        {
+          "name": "atualizar_streak",
+          "sql": "CREATE OR REPLACE FUNCTION atualizar_streak(p_user_id UUID)\nRETURNS VOID AS $$\nDECLARE\n  v_last_read TIMESTAMPTZ;\n  v_current_streak INT;\nBEGIN\n  SELECT last_read_at, streak_current\n  INTO v_last_read, v_current_streak\n  FROM user_profiles\n  WHERE id = p_user_id;\n\n  IF v_last_read IS NULL OR v_last_read < NOW() - INTERVAL '2 days' THEN\n    -- Streak quebrado ou usuário novo\n    UPDATE user_profiles\n    SET streak_current = 1,\n        last_read_at = NOW()\n    WHERE id = p_user_id;\n  ELSIF DATE(v_last_read) < DATE(NOW()) THEN\n    -- Novo dia, incrementa streak\n    UPDATE user_profiles\n    SET streak_current = streak_current + 1,\n        streak_best = GREATEST(streak_best, streak_current + 1),\n        last_read_at = NOW()\n    WHERE id = p_user_id;\n  END IF;\nEND;\n$$ LANGUAGE plpgsql SECURITY DEFINER;"
+        }
+      ]
+    },
+    {
+      "name": "ZAKAR — Workflow 2: Roteamento de Agentes",
+      "description": "Recebe a pergunta do usuário via webhook, classifica a intenção, busca memória RAG no Supabase, chama o agente correto no Groq, salva fragmento de memória, retorna resposta.",
+      "notes": "Este workflow é chamado pela API route /api/chat do Next.js via POST webhook.",
+      "nodes": [
+        {
+          "id": "1",
+          "name": "Webhook Entrada",
+          "type": "n8n-nodes-base.webhook",
+          "position": [240, 300],
+          "parameters": {
+            "path": "zakar-chat",
+            "httpMethod": "POST",
+            "responseMode": "lastNode",
+            "options": {}
+          },
+          "notes": "URL final: https://cjota-n8n-02.9eo9b2.easypanel.host/webhook/zakar-chat"
+        },
+        {
+          "id": "2",
+          "name": "Classificar Intenção",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [460, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.groq.com/openai/v1/chat/completions",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.GROQ_API_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"model\": \"llama3-8b-8192\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Você é um classificador de intenção bíblica. Analise a mensagem e responda APENAS com uma dessas palavras:\\n\\nhiistoriador - perguntas sobre Antigo Testamento, história, contexto, reis, profetas\\nconselheiro - Salmos, Provérbios, Eclesiastes, Jó, questões emocionais, decisões de vida\\ndoutrinador - Novo Testamento, Jesus, graça, salvação, Paulo, Apocalipse\\nespecialista - temas transversais, personagens específicos, cruzando AT e NT\\ngeral - não se encaixa claramente\\n\\nMensagem: {{ $json.body.message }}\"\n    }\n  ],\n  \"temperature\": 0,\n  \"max_tokens\": 10\n}"
+          }
+        },
+        {
+          "id": "3",
+          "name": "Extrair Agente",
+          "type": "n8n-nodes-base.code",
+          "position": [680, 300],
+          "parameters": {
+            "jsCode": "const classificacao = $json.choices[0].message.content.trim().toLowerCase();\nconst agentesValidos = ['historiador', 'conselheiro', 'doutrinador', 'especialista'];\nconst agente = agentesValidos.includes(classificacao) ? classificacao : 'conselheiro';\n\nreturn {\n  agente,\n  user_id: $('Webhook Entrada').item.json.body.user_id,\n  message: $('Webhook Entrada').item.json.body.message,\n  context_book: $('Webhook Entrada').item.json.body.context_book || null,\n  context_chapter: $('Webhook Entrada').item.json.body.context_chapter || null,\n  context_verse: $('Webhook Entrada').item.json.body.context_verse || null,\n  verse_text: $('Webhook Entrada').item.json.body.verse_text || null\n};"
+          }
+        },
+        {
+          "id": "4",
+          "name": "Buscar Memória RAG",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [900, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/buscar_memoria_semantica",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"p_user_id\": \"{{ $json.user_id }}\",\n  \"p_limit\": 5\n}",
+            "notes": "Por enquanto busca os 5 mais recentes. Quando pgvector estiver configurado, trocar por busca semântica real."
+          }
+        },
+        {
+          "id": "5",
+          "name": "Buscar Perfil do Usuário",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [1120, 300],
+          "parameters": {
+            "method": "GET",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/user_profiles",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                }
+              ]
+            },
+            "sendQuery": true,
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "id",
+                  "value": "=eq.{{ $('Extrair Agente').item.json.user_id }}"
+                },
+                {
+                  "name": "select",
+                  "value": "name,life_stage"
+                },
+                {
+                  "name": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "6",
+          "name": "Montar Prompt do Agente",
+          "type": "n8n-nodes-base.code",
+          "position": [1340, 300],
+          "parameters": {
+            "jsCode": "const dados = $('Extrair Agente').item.json;\nconst memorias = $('Buscar Memória RAG').all().map(m => m.json.content).filter(Boolean).join('\\n- ');\nconst perfil = $('Buscar Perfil do Usuário').first().json;\n\nconst systemPrompts = {\n  historiador: `Você é O Historiador, agente do Zakar especializado em Antigo Testamento.\nSua especialidade: contexto histórico, reis de Israel e Judá, profetas, arqueologia bíblica.\nTom: professoral, apaixonado, conta histórias com detalhes vívidos.\nEstilo: 'Imagina que você está em 600 a.C., em Jerusalém sitiada...'`,\n\n  conselheiro: `Você é O Conselheiro, agente do Zakar especializado em Livros de Sabedoria.\nSua especialidade: Salmos, Provérbios, Eclesiastes, Cantares, Jó. Aplicação prática à vida.\nTom: empático, cuidadoso, nunca minimiza a dor.\nEstilo: conecta o texto bíblico com a situação real do usuário.`,\n\n  doutrinador: `Você é O Doutrinador, agente do Zakar especializado em Novo Testamento.\nSua especialidade: Evangelhos, Epístolas de Paulo, graça, salvação, vida cristã prática.\nTom: firme, claro, acessível. Explica teologia sem jargão.\nEstilo: 'Justificação, em termos simples, é como se sua ficha criminal fosse apagada...'`,\n\n  especialista: `Você é A Especialista Temática, agente do Zakar.\nSua especialidade: temas transversais por toda a Bíblia, biografias bíblicas completas, tipologia, simbolismo.\nTom: entusiasmado, conecta pontos de forma fascinante.\nEstilo: 'Sabia que tem pelo menos 7 mulheres chamadas Maria na Bíblia?'`\n};\n\nconst system = systemPrompts[dados.agente] || systemPrompts.conselheiro;\n\nconst contextoPerfil = perfil ? `- Nome: ${perfil.name}\\n- Momento de vida: ${perfil.life_stage}` : '';\nconst contextoMemoria = memorias ? `- Fragmentos de memória relevantes:\\n- ${memorias}` : '- Sem histórico ainda.';\nconst contextoLeitura = dados.verse_text ? `- Leitura atual: ${dados.context_book} ${dados.context_chapter}:${dados.context_verse}\\n- Texto: \"${dados.verse_text}\"` : '';\n\nconst userPrompt = `CONTEXTO DO USUÁRIO:\\n${contextoPerfil}\\n${contextoMemoria}\\n${contextoLeitura}\\n\\nREGRAS:\\n1. Máximo 250 palavras\\n2. Nunca invente textos bíblicos\\n3. Finalize com uma pergunta ou reflexão\\n4. Linguagem acessível, sem jargão teológico sem explicação\\n\\nPergunta: ${dados.message}`;\n\nreturn {\n  agente: dados.agente,\n  user_id: dados.user_id,\n  message: dados.message,\n  system_prompt: system,\n  user_prompt: userPrompt\n};"
+          }
+        },
+        {
+          "id": "7",
+          "name": "Chamar Groq — Agente",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [1560, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.groq.com/openai/v1/chat/completions",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.GROQ_API_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"model\": \"llama3-70b-8192\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"{{ $json.system_prompt }}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.user_prompt }}\"\n    }\n  ],\n  \"temperature\": 0.75,\n  \"max_tokens\": 600\n}"
+          }
+        },
+        {
+          "id": "8",
+          "name": "Extrair Resposta",
+          "type": "n8n-nodes-base.code",
+          "position": [1780, 300],
+          "parameters": {
+            "jsCode": "const resposta = $json.choices[0].message.content;\nconst dados = $('Montar Prompt do Agente').item.json;\n\nreturn {\n  resposta,\n  agente: dados.agente,\n  user_id: dados.user_id,\n  pergunta: dados.message\n};"
+          }
+        },
+        {
+          "id": "9",
+          "name": "Salvar Fragmento de Memória",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [2000, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/memory_fragments",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"user_id\": \"{{ $json.user_id }}\",\n  \"content\": \"Usuário perguntou: {{ $json.pergunta }}\",\n  \"type\": \"conversa\"\n}"
+          }
+        },
+        {
+          "id": "10",
+          "name": "Retornar Resposta",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "position": [2220, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={\n  \"resposta\": \"{{ $('Extrair Resposta').item.json.resposta }}\",\n  \"agente\": \"{{ $('Extrair Resposta').item.json.agente }}\"\n}",
+            "options": {
+              "responseHeaders": {
+                "entries": [
+                  {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "connections": {
+        "Webhook Entrada": { "main": [[{ "node": "Classificar Intenção", "type": "main", "index": 0 }]] },
+        "Classificar Intenção": { "main": [[{ "node": "Extrair Agente", "type": "main", "index": 0 }]] },
+        "Extrair Agente": { "main": [[{ "node": "Buscar Memória RAG", "type": "main", "index": 0 }]] },
+        "Buscar Memória RAG": { "main": [[{ "node": "Buscar Perfil do Usuário", "type": "main", "index": 0 }]] },
+        "Buscar Perfil do Usuário": { "main": [[{ "node": "Montar Prompt do Agente", "type": "main", "index": 0 }]] },
+        "Montar Prompt do Agente": { "main": [[{ "node": "Chamar Groq — Agente", "type": "main", "index": 0 }]] },
+        "Chamar Groq — Agente": { "main": [[{ "node": "Extrair Resposta", "type": "main", "index": 0 }]] },
+        "Extrair Resposta": { "main": [[{ "node": "Salvar Fragmento de Memória", "type": "main", "index": 0 }]] },
+        "Salvar Fragmento de Memória": { "main": [[{ "node": "Retornar Resposta", "type": "main", "index": 0 }]] }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "timezone": "America/Sao_Paulo"
+      }
+    },
+    {
+      "name": "ZAKAR — Workflow 3: Processamento de Quiz",
+      "description": "Recebe as respostas do quiz via webhook, calcula XP, atualiza streak, verifica badges, gera feedback personalizado via Groq, salva resultado.",
+      "nodes": [
+        {
+          "id": "1",
+          "name": "Webhook Quiz",
+          "type": "n8n-nodes-base.webhook",
+          "position": [240, 300],
+          "parameters": {
+            "path": "zakar-quiz",
+            "httpMethod": "POST",
+            "responseMode": "lastNode",
+            "options": {}
+          },
+          "notes": "URL final: https://cjota-n8n-02.9eo9b2.easypanel.host/webhook/zakar-quiz"
+        },
+        {
+          "id": "2",
+          "name": "Calcular Score e XP",
+          "type": "n8n-nodes-base.code",
+          "position": [460, 300],
+          "parameters": {
+            "jsCode": "const { user_id, journey_day_id, questions } = $json.body;\n\n// Calcula quantas respostas corretas\nconst total = questions.length;\nconst acertos = questions.filter(q => q.user_answer === q.correct).length;\nconst score = Math.round((acertos / total) * 100);\n\n// Tabela de XP\nlet xp = 0;\nif (score === 100) xp = 35;\nelse if (score >= 70) xp = 20;\nelse if (score >= 50) xp = 10;\nelse xp = 5;\n\nreturn {\n  user_id,\n  journey_day_id,\n  questions,\n  score,\n  xp_earned: xp,\n  acertos,\n  total\n};"
+          }
+        },
+        {
+          "id": "3",
+          "name": "Salvar Resultado do Quiz",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [680, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/quiz_results",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"user_id\": \"{{ $json.user_id }}\",\n  \"journey_day_id\": \"{{ $json.journey_day_id }}\",\n  \"questions\": {{ JSON.stringify($json.questions) }},\n  \"score\": {{ $json.score }},\n  \"xp_earned\": {{ $json.xp_earned }}\n}"
+          }
+        },
+        {
+          "id": "4",
+          "name": "Adicionar XP ao Perfil",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [900, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/adicionar_xp",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "apikey",
+                  "value": "={{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.ZAKAR_SUPABASE_SERVICE_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"p_user_id\": \"{{ $('Calcular Score e XP').item.json.user_id }}\",\n  \"p_xp\": {{ $('Calcular Score e XP').item.json.xp_earned }}\n}"
+          }
+        },
+        {
+          "id": "5",
+          "name": "Gerar Feedback da IA",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [1120, 300],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.groq.com/openai/v1/chat/completions",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $env.GROQ_API_KEY }}"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyContentType": "json",
+            "jsonBody": "={\n  \"model\": \"llama3-8b-8192\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"O usuário acabou de completar um quiz bíblico e acertou {{ $('Calcular Score e XP').item.json.acertos }} de {{ $('Calcular Score e XP').item.json.total }} questões ({{ $('Calcular Score e XP').item.json.score }}% de acerto) e ganhou {{ $('Calcular Score e XP').item.json.xp_earned }} XP.\\n\\nEscreva uma mensagem de feedback curta (máximo 3 linhas) que:\\n- Se score >= 70: comemore com entusiasmo e encoraje a continuar\\n- Se score < 70: encoraje sem humilhar, diga que errar faz parte do aprendizado\\n- Mencione os XP ganhos\\n- Use tom caloroso e próximo\\n- Termine com uma frase motivacional bíblica curta\\n\\nNão use emoji excessivo. Máximo 2 emojis.\"\n    }\n  ],\n  \"temperature\": 0.8,\n  \"max_tokens\": 150\n}"
+          }
+        },
+        {
+          "id": "6",
+          "name": "Retornar Feedback",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "position": [1340, 300],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={\n  \"score\": {{ $('Calcular Score e XP').item.json.score }},\n  \"xp_earned\": {{ $('Calcular Score e XP').item.json.xp_earned }},\n  \"acertos\": {{ $('Calcular Score e XP').item.json.acertos }},\n  \"total\": {{ $('Calcular Score e XP').item.json.total }},\n  \"feedback\": \"{{ $('Gerar Feedback da IA').item.json.choices[0].message.content }}\"\n}"
+          }
+        }
+      ],
+      "connections": {
+        "Webhook Quiz": { "main": [[{ "node": "Calcular Score e XP", "type": "main", "index": 0 }]] },
+        "Calcular Score e XP": { "main": [[{ "node": "Salvar Resultado do Quiz", "type": "main", "index": 0 }]] },
+        "Salvar Resultado do Quiz": { "main": [[{ "node": "Adicionar XP ao Perfil", "type": "main", "index": 0 }]] },
+        "Adicionar XP ao Perfil": { "main": [[{ "node": "Gerar Feedback da IA", "type": "main", "index": 0 }]] },
+        "Gerar Feedback da IA": { "main": [[{ "node": "Retornar Feedback", "type": "main", "index": 0 }]] }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "timezone": "America/Sao_Paulo"
+      },
+      "sql_functions_needed": [
+        {
+          "name": "adicionar_xp",
+          "sql": "CREATE OR REPLACE FUNCTION adicionar_xp(p_user_id UUID, p_xp INT)\nRETURNS VOID AS $$\nDECLARE\n  v_novo_xp INT;\n  v_novo_nivel INT;\nBEGIN\n  UPDATE user_profiles\n  SET xp = xp + p_xp\n  WHERE id = p_user_id\n  RETURNING xp INTO v_novo_xp;\n\n  -- Calcula novo nível baseado no XP total\n  v_novo_nivel := CASE\n    WHEN v_novo_xp >= 7000 THEN 7\n    WHEN v_novo_xp >= 3500 THEN 6\n    WHEN v_novo_xp >= 1800 THEN 5\n    WHEN v_novo_xp >= 900  THEN 4\n    WHEN v_novo_xp >= 400  THEN 3\n    WHEN v_novo_xp >= 150  THEN 2\n    ELSE 1\n  END;\n\n  UPDATE user_profiles\n  SET level = v_novo_nivel\n  WHERE id = p_user_id;\nEND;\n$$ LANGUAGE plpgsql SECURITY DEFINER;"
+        }
+      ]
+    }
+  ],
+  "variaveis_de_ambiente_n8n": {
+    "instrucoes": "No n8n, vá em Settings > Variables e crie as variáveis abaixo:",
+    "variaveis": [
+      {
+        "nome": "ZAKAR_SUPABASE_URL",
+        "exemplo": "https://abcdefgh.supabase.co",
+        "onde_encontrar": "Supabase Dashboard > Project Settings > API > Project URL"
+      },
+      {
+        "nome": "ZAKAR_SUPABASE_SERVICE_KEY",
+        "exemplo": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "onde_encontrar": "Supabase Dashboard > Project Settings > API > service_role key (não a anon key!)"
+      },
+      {
+        "nome": "GROQ_API_KEY",
+        "exemplo": "gsk_xxxxxxxxxxxxxxxxxxxx",
+        "onde_encontrar": "console.groq.com > API Keys > Create API Key"
+      }
+    ]
+  },
+  "webhooks_para_o_nextjs": {
+    "chat": "https://cjota-n8n-02.9eo9b2.easypanel.host/webhook/zakar-chat",
+    "quiz": "https://cjota-n8n-02.9eo9b2.easypanel.host/webhook/zakar-quiz"
+  }
+}

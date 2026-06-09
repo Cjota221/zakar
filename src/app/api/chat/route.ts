@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Agente "${agent}" não encontrado` }, { status: 400 })
   }
 
-  const apiKey = process.env.GROK_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'GROK_API_KEY não configurada' }, { status: 500 })
+    return NextResponse.json({ error: 'GROQ_API_KEY não configurada' }, { status: 500 })
   }
 
   // Buscar perfil do usuário para personalização
@@ -48,14 +48,14 @@ export async function POST(req: NextRequest) {
     : ''
 
   try {
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-3-mini',
+        model: 'llama3-70b-8192',
         max_tokens: 1024,
         messages: [
           { role: 'system', content: systemPrompt + userContext + bibleContext },
