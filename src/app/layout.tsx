@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: 'Zakar — Discipulado Bíblico',
   description: 'O app de discipulado bíblico com memória real e contínua. Sua palavra certa, no momento certo.',
   manifest: '/manifest.json',
+  icons: {
+    icon: [{ url: '/fivon-zakar.png', type: 'image/png' }],
+    apple: [{ url: '/fivon-zakar.png', type: 'image/png' }],
+    shortcut: '/fivon-zakar.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
