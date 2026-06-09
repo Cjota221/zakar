@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { SignOut, Brain, Bell, Gear } from '@phosphor-icons/react/dist/ssr'
 import StreakBadge from '@/components/gamification/StreakBadge'
 import Card from '@/components/ui/Card'
+import { FontScaleSlider } from '@/components/ui/FontScaleSlider'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -88,6 +89,21 @@ export default async function PerfilPage() {
             </span>
           }
         />
+      </div>
+
+      {/* Preferências de leitura */}
+      <div style={{ marginBottom: '24px' }}>
+        <p style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '9px',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: 'var(--text-muted)',
+          marginBottom: '10px',
+        }}>
+          Preferências de leitura
+        </p>
+        <FontScaleSlider />
       </div>
 
       {/* Menu */}
