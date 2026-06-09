@@ -8,7 +8,6 @@ import Input from '@/components/ui/Input'
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
@@ -22,6 +21,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     setMessage('')
+    const supabase = createClient()
 
     if (mode === 'signup') {
       const { error } = await supabase.auth.signUp({ email, password })
@@ -44,6 +44,7 @@ export default function LoginPage() {
   }
 
   async function handleGoogle() {
+    const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/home` },

@@ -44,7 +44,6 @@ const TOTAL_STEPS = 5
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -68,6 +67,7 @@ export default function OnboardingPage() {
   }
 
   async function handleFinish() {
+    const supabase = createClient()
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
