@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Agente "${agent}" não encontrado` }, { status: 400 })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.GROK_API_KEY
   if (!apiKey) {
-    return NextResponse.json({ error: 'ANTHROPIC_API_KEY não configurada' }, { status: 500 })
+    return NextResponse.json({ error: 'GROK_API_KEY não configurada' }, { status: 500 })
   }
 
   // Buscar perfil do usuário para personalização
@@ -48,18 +48,19 @@ export async function POST(req: NextRequest) {
     : ''
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'grok-3-mini',
         max_tokens: 1024,
-        system: systemPrompt + userContext + bibleContext,
-        messages: [{ role: 'user', content: message }],
+        messages: [
+          { role: 'system', content: systemPrompt + userContext + bibleContext },
+          { role: 'user', content: message },
+        ],
       }),
     })
 
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json()
-    const agentResponse = data.content[0]?.text ?? ''
+    const agentResponse = data.choices[0]?.message?.content ?? ''
 
     // Salvar no log
     await supabase.from('chat_logs').insert({
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
       context_book: context_book ?? null,
       context_chapter: context_chapter ?? null,
       context_verse: context_verse ?? null,
-      tokens_used: data.usage?.input_tokens + data.usage?.output_tokens ?? 0,
+      tokens_used: (data.usage?.prompt_tokens ?? 0) + (data.usage?.completion_tokens ?? 0),
     })
 
     return NextResponse.json({ response: agentResponse })
