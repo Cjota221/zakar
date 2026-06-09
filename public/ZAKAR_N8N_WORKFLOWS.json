@@ -363,7 +363,7 @@
           "position": [900, 300],
           "parameters": {
             "method": "POST",
-            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/buscar_memoria_semantica",
+            "url": "={{ $env.ZAKAR_SUPABASE_URL }}/rest/v1/rpc/buscar_memoria_usuario",
             "sendHeaders": true,
             "headerParameters": {
               "parameters": [
@@ -384,7 +384,7 @@
             "sendBody": true,
             "bodyContentType": "json",
             "jsonBody": "={\n  \"p_user_id\": \"{{ $json.user_id }}\",\n  \"p_limit\": 5\n}",
-            "notes": "Por enquanto busca os 5 mais recentes. Quando pgvector estiver configurado, trocar por busca semântica real."
+            "notes": "Busca os 5 fragmentos de memória mais recentes. buscar_memoria_semantica exige embedding vetorial — usar quando pgvector estiver integrado."
           }
         },
         {
