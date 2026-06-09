@@ -5,7 +5,9 @@ import { redirect } from 'next/navigation'
 import { SignOut, Brain, Bell, Gear } from '@phosphor-icons/react/dist/ssr'
 import StreakBadge from '@/components/gamification/StreakBadge'
 import Card from '@/components/ui/Card'
-import { FontScaleSlider } from '@/components/ui/FontScaleSlider'
+import { AvatarUpload } from '@/components/profile/AvatarUpload'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import EditableNameForm from '@/components/profile/EditableNameForm'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -35,35 +37,18 @@ export default async function PerfilPage() {
   }
 
   return (
-    <div className="page-enter" style={{ padding: '24px 16px' }}>
+    <div className="page-enter" style={{ padding: '24px 16px', paddingBottom: '100px' }}>
       {/* Avatar + nome */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <div style={{
-          width: '56px',
-          height: '56px',
-          borderRadius: '50%',
-          background: 'var(--gold-dim)',
-          border: '1.5px solid var(--gold-border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700, color: 'var(--gold)' }}>
-            {profile.name?.[0]?.toUpperCase() ?? '?'}
-          </span>
-        </div>
-        <div>
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '20px',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-          }}>
-            {profile.name}
-          </h1>
+        <AvatarUpload
+          userId={user.id}
+          name={profile.name ?? ''}
+          avatarUrl={profile.avatar_url ?? null}
+        />
+        <div style={{ flex: 1 }}>
+          <EditableNameForm userId={user.id} initialName={profile.name ?? ''} />
           {profile.life_stage && (
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--text-muted)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>
               {lifeStageLabels[profile.life_stage]}
             </p>
           )}
@@ -75,80 +60,36 @@ export default async function PerfilPage() {
         <StatCard label="Streak" value={<StreakBadge days={profile.streak_current} />} />
         <StatCard
           label="XP"
-          value={
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: 'var(--gold)' }}>
-              {profile.xp}
-            </span>
-          }
+          value={<span style={{ fontFamily: 'var(--font-mono)', fontSize: '16px', color: 'var(--gold)' }}>{profile.xp}</span>}
         />
         <StatCard
           label="Nível"
-          value={
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-              {levelNames[profile.level]}
-            </span>
-          }
+          value={<span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{levelNames[profile.level]}</span>}
         />
       </div>
 
-      {/* Preferências de leitura */}
+      {/* Tema */}
       <div style={{ marginBottom: '24px' }}>
-        <p style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '9px',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          color: 'var(--text-muted)',
-          marginBottom: '10px',
-        }}>
-          Preferências de leitura
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px' }}>
+          Aparência
         </p>
-        <FontScaleSlider />
+        <ThemeToggle />
       </div>
 
       {/* Menu */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <MenuRow
-          icon={<Brain size={20} color="var(--gold)" />}
-          label="Minha Memória"
-          sub="Veja o que o Zakar sabe sobre você"
-          href="/perfil/memoria"
-        />
-        <MenuRow
-          icon={<Bell size={20} color="var(--text-secondary)" />}
-          label="Notificações"
-          sub="Horário do Despertar e lembretes"
-          href="/perfil/notificacoes"
-        />
-        <MenuRow
-          icon={<Gear size={20} color="var(--text-secondary)" />}
-          label="Configurações"
-          sub="Conta, tema, privacidade"
-          href="/perfil/configuracoes"
-        />
+        <MenuRow icon={<Brain size={20} color="var(--gold)" />} label="Minha Memória" sub="Veja o que o Zakar sabe sobre você" href="/perfil/memoria" />
+        <MenuRow icon={<Bell size={20} color="var(--text-secondary)" />} label="Notificações" sub="Horário do Despertar e lembretes" href="/perfil/notificacoes" />
+        <MenuRow icon={<Gear size={20} color="var(--text-secondary)" />} label="Configurações" sub="Conta, privacidade" href="/perfil/configuracoes" />
 
         <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '14px',
-              padding: '16px 0',
-              background: 'none',
-              border: 'none',
-              borderTop: '0.5px solid var(--border-default)',
-              cursor: 'pointer',
-              marginTop: '8px',
-            }}
-          >
+          <button type="submit" style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: '14px',
+            padding: '16px 0', background: 'none', border: 'none',
+            borderTop: '0.5px solid var(--border-default)', cursor: 'pointer', marginTop: '8px',
+          }}>
             <SignOut size={20} color="var(--color-error)" />
-            <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '14px',
-              color: 'var(--color-error)',
-            }}>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--color-error)' }}>
               Sair da conta
             </span>
           </button>
@@ -162,44 +103,18 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Card padding="12px" style={{ textAlign: 'center' }}>
       <div style={{ marginBottom: '6px' }}>{value}</div>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-muted)' }}>
-        {label}
-      </p>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-muted)' }}>{label}</p>
     </Card>
   )
 }
 
-function MenuRow({
-  icon,
-  label,
-  sub,
-  href,
-}: {
-  icon: React.ReactNode
-  label: string
-  sub: string
-  href: string
-}) {
+function MenuRow({ icon, label, sub, href }: { icon: React.ReactNode; label: string; sub: string; href: string }) {
   return (
-    <a
-      href={href}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '14px',
-        padding: '14px 0',
-        borderBottom: '0.5px solid var(--border-default)',
-        textDecoration: 'none',
-      }}
-    >
+    <a href={href} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderBottom: '0.5px solid var(--border-default)', textDecoration: 'none' }}>
       {icon}
       <div style={{ flex: 1 }}>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}>
-          {label}
-        </p>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-muted)' }}>
-          {sub}
-        </p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', fontWeight: 500 }}>{label}</p>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{sub}</p>
       </div>
     </a>
   )

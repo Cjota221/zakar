@@ -6,12 +6,7 @@ import { Sun, ArrowRight, BookmarkSimple } from '@phosphor-icons/react/dist/ssr'
 import StreakBadge from '@/components/gamification/StreakBadge'
 import Card from '@/components/ui/Card'
 import Link from 'next/link'
-
-function getGreeting(hour: number): string {
-  if (hour < 12) return 'Bom dia'
-  if (hour < 18) return 'Boa tarde'
-  return 'Boa noite'
-}
+import { Greeting } from '@/components/ui/Greeting'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -46,9 +41,6 @@ export default async function HomePage() {
 
   if (!profile) redirect('/onboarding')
 
-  const hour = new Date().getHours()
-  const greeting = getGreeting(hour)
-
   const levelNames: Record<number, string> = {
     1: 'Semente',
     2: 'Raiz',
@@ -63,14 +55,7 @@ export default async function HomePage() {
     <div className="page-enter" style={{ padding: '0 0 8px' }}>
       {/* Header */}
       <div style={{ padding: '16px 16px 12px' }}>
-        <p style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '12px',
-          color: 'var(--text-muted)',
-          marginBottom: '4px',
-        }}>
-          {greeting}, {profile.name}
-        </p>
+        <Greeting name={profile.name ?? ''} />
         <h1 style={{
           fontFamily: 'var(--font-display)',
           fontSize: '26px',

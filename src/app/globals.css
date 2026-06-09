@@ -8,13 +8,13 @@
 
   /* === ESCALA DE FONTE === */
   --font-scale: 1;
-  --font-size-xs:   calc(11px * var(--font-scale));
-  --font-size-sm:   calc(13px * var(--font-scale));
-  --font-size-base: calc(15px * var(--font-scale));
-  --font-size-md:   calc(17px * var(--font-scale));
-  --font-size-lg:   calc(22px * var(--font-scale));
-  --font-size-xl:   calc(28px * var(--font-scale));
-  --font-size-2xl:  calc(32px * var(--font-scale));
+  --font-size-xs:   calc(13px * var(--font-scale));
+  --font-size-sm:   calc(15px * var(--font-scale));
+  --font-size-base: calc(17px * var(--font-scale));
+  --font-size-md:   calc(19px * var(--font-scale));
+  --font-size-lg:   calc(24px * var(--font-scale));
+  --font-size-xl:   calc(30px * var(--font-scale));
+  --font-size-2xl:  calc(34px * var(--font-scale));
 
   /* === BACKGROUNDS (Light Mode) === */
   --bg-primary:   #F9F9F6;

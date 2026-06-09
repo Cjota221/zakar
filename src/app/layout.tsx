@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { FontScaleProvider } from '@/lib/contexts/FontScaleContext'
+import { ThemeProvider } from '@/lib/contexts/ThemeContext'
 
 export const metadata: Metadata = {
   title: 'Zakar — Discipulado Bíblico',
@@ -38,7 +39,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
-        <FontScaleProvider>{children}</FontScaleProvider>
+        <ThemeProvider>
+          <FontScaleProvider>{children}</FontScaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
