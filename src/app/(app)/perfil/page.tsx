@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { SignOut, Brain, Bell, Gear } from '@phosphor-icons/react/dist/ssr'

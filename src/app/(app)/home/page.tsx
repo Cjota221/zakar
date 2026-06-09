@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Sun, ArrowRight, BookmarkSimple } from '@phosphor-icons/react/dist/ssr'
