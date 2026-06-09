@@ -74,17 +74,17 @@ export default function BibliaPage() {
           )}
           <div style={{ flex: 1 }}>
             {view === 'index' && (
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Bíblia NVI
               </h1>
             )}
             {view === 'chapters' && selectedBook && (
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-md)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {selectedBook.name}
               </h1>
             )}
             {view === 'reader' && selectedBook && (
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {selectedBook.name} {selectedChapter + 1}
               </h1>
             )}
@@ -113,7 +113,7 @@ export default function BibliaPage() {
                 border: '1px solid var(--border-default)',
                 borderRadius: 'var(--radius-sm)',
                 fontFamily: 'var(--font-body)',
-                fontSize: '13px',
+                fontSize: 'var(--font-size-sm)',
                 color: 'var(--text-primary)',
                 outline: 'none',
                 boxSizing: 'border-box',
@@ -140,7 +140,7 @@ export default function BibliaPage() {
                 background: 'none', border: 'none', cursor: selectedChapter === 0 ? 'default' : 'pointer',
                 color: selectedChapter === 0 ? 'var(--border-default)' : 'var(--text-muted)',
                 display: 'flex', alignItems: 'center', gap: '4px',
-                fontFamily: 'var(--font-body)', fontSize: '12px', padding: '4px 0',
+                fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', padding: '4px 0',
               }}
             >
               <CaretLeft size={14} /> Anterior
@@ -156,7 +156,7 @@ export default function BibliaPage() {
                 cursor: selectedChapter >= selectedBook.chapters - 1 ? 'default' : 'pointer',
                 color: selectedChapter >= selectedBook.chapters - 1 ? 'var(--border-default)' : 'var(--text-muted)',
                 display: 'flex', alignItems: 'center', gap: '4px',
-                fontFamily: 'var(--font-body)', fontSize: '12px', padding: '4px 0',
+                fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', padding: '4px 0',
               }}
             >
               Próximo <CaretRight size={14} />
@@ -173,7 +173,7 @@ export default function BibliaPage() {
           ) : search.trim() ? (
             <div>
               {filteredBooks.length === 0 ? (
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', paddingTop: '32px' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', textAlign: 'center', paddingTop: '32px' }}>
                   Nenhum livro encontrado
                 </p>
               ) : (
@@ -236,7 +236,7 @@ export default function BibliaPage() {
           </p>
           <p style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '13px',
+            fontSize: 'var(--font-size-sm)',
             color: 'var(--text-muted)',
             marginBottom: '20px',
           }}>
@@ -304,7 +304,7 @@ export default function BibliaPage() {
               >
                 <span style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '9px',
+                  fontSize: 'var(--font-size-xs)',
                   color: 'var(--gold)',
                   minWidth: '18px',
                   paddingTop: '4px',
@@ -317,7 +317,7 @@ export default function BibliaPage() {
                   ref={el => { verseRefs.current[i] = el }}
                   style={{
                     fontFamily: 'var(--font-body)',
-                    fontSize: '15px',
+                    fontSize: 'var(--font-size-base)',
                     lineHeight: 1.8,
                     color: 'var(--text-secondary)',
                     margin: 0,
@@ -352,10 +352,10 @@ function BookRow({ book, onSelect, divider = false }: { book: BookMeta; onSelect
         textAlign: 'left',
       }}
     >
-      <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text-primary)' }}>
+      <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>
         {book.name}
       </span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
         {book.chapters} cap
       </span>
     </button>
