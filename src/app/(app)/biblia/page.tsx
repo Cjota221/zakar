@@ -221,32 +221,70 @@ export default function BibliaPage() {
 
       {/* ── CHAPTERS: grade de capítulos ── */}
       {view === 'chapters' && selectedBook && (
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: '20px 16px' }}>
+          {/* Abbrev decorativo */}
+          <p style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '11px',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--gold)',
+            marginBottom: '4px',
+            opacity: 0.7,
+          }}>
+            {selectedBook.abbrev} · {selectedBook.chapters} capítulos
+          </p>
+          <p style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '13px',
+            color: 'var(--text-muted)',
+            marginBottom: '20px',
+          }}>
+            Escolha onde começar a leitura
+          </p>
+
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(6, 1fr)',
-            gap: '8px',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '10px',
           }}>
             {Array.from({ length: selectedBook.chapters }, (_, i) => (
               <button
                 key={i}
                 onClick={() => openChapter(i)}
                 style={{
-                  aspectRatio: '1',
+                  padding: '16px 8px 14px',
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border-default)',
-                  borderRadius: 'var(--radius-sm)',
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
+                  borderRadius: 'var(--radius-md)',
                   cursor: 'pointer',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: '4px',
+                  transition: 'border-color 0.15s',
                 }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--gold-border)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
               >
-                {i + 1}
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: 'var(--gold)',
+                  lineHeight: 1,
+                }}>
+                  {i + 1}
+                </span>
+                <span style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '9px',
+                  color: 'var(--text-muted)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}>
+                  cap
+                </span>
               </button>
             ))}
           </div>
