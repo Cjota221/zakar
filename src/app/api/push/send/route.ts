@@ -1,18 +1,20 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
-
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
 
 export async function POST(req: Request) {
   const authHeader = req.headers.get('x-zakar-key')
   if (authHeader !== process.env.ZAKAR_INTERNAL_KEY) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  )
 
   const { userId, title, body, url } = await req.json()
 
