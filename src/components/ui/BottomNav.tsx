@@ -27,7 +27,7 @@ export default function BottomNav() {
             aria-label={label}
           >
             <Icon
-              size={23}
+              size={21}
               weight={active ? 'fill' : 'regular'}
               color="currentColor"
             />
