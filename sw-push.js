@@ -1,3 +1,6 @@
+// Required by next-pwa (injectManifest mode) — Workbox injects the precache list here
+self.__WB_MANIFEST
+
 self.addEventListener('push', function (event) {
   if (!event.data) return
 
