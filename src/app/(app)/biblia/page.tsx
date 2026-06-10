@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { CaretLeft, CaretRight, MagnifyingGlass, X, ArrowLeft } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, MagnifyingGlass, X, ArrowLeft, ClockCounterClockwise } from '@phosphor-icons/react'
 import { fetchBookIndex, fetchBook, BOOK_GROUPS, type BookMeta, type BibleBook } from '@/lib/bible'
+import { BibleTimeline } from '@/components/biblia/BibleTimeline'
+import { getEraForBook } from '@/lib/bible/timeline'
 
-type View = 'index' | 'chapters' | 'reader'
+type View = 'index' | 'timeline' | 'chapters' | 'reader'
 
 export default function BibliaPage() {
   const [view, setView] = useState<View>('index')
@@ -61,7 +63,7 @@ export default function BibliaPage() {
         padding: '12px 16px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {view !== 'index' && (
+          {view !== 'index' && view !== 'timeline' && (
             <button
               onClick={() => {
                 if (view === 'reader') setView('chapters')
@@ -73,7 +75,7 @@ export default function BibliaPage() {
             </button>
           )}
           <div style={{ flex: 1 }}>
-            {view === 'index' && (
+            {(view === 'index' || view === 'timeline') && (
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Bíblia NVI
               </h1>
@@ -89,6 +91,23 @@ export default function BibliaPage() {
               </h1>
             )}
           </div>
+          {(view === 'index' || view === 'timeline') && (
+            <button
+              onClick={() => setView(view === 'timeline' ? 'index' : 'timeline')}
+              title="Linha do tempo"
+              style={{
+                background: view === 'timeline' ? 'rgba(212,175,55,0.12)' : 'none',
+                border: view === 'timeline' ? '1px solid rgba(212,175,55,0.3)' : 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                padding: '6px',
+                color: view === 'timeline' ? 'var(--gold)' : 'var(--text-muted)',
+                display: 'flex',
+              }}
+            >
+              <ClockCounterClockwise size={20} />
+            </button>
+          )}
           {view === 'index' && (
             <button
               onClick={() => {}}
@@ -165,6 +184,11 @@ export default function BibliaPage() {
         )}
       </div>
 
+      {/* ── TIMELINE: linha do tempo ── */}
+      {view === 'timeline' && (
+        <BibleTimeline currentBook={selectedBook?.abbrev} />
+      )}
+
       {/* ── INDEX: lista de livros ── */}
       {view === 'index' && (
         <div style={{ padding: '16px' }}>
@@ -238,10 +262,45 @@ export default function BibliaPage() {
             fontFamily: 'var(--font-display)',
             fontSize: 'var(--font-size-sm)',
             color: 'var(--text-muted)',
-            marginBottom: '20px',
+            marginBottom: '14px',
           }}>
             Escolha onde começar a leitura
           </p>
+
+          {/* Banner de era cronológica */}
+          {(() => {
+            const era = getEraForBook(selectedBook.abbrev)
+            if (!era) return null
+            return (
+              <button
+                onClick={() => setView('timeline')}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '10px 12px',
+                  background: `${era.color}0D`,
+                  border: `1px solid ${era.color}35`,
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  marginBottom: '20px',
+                  textAlign: 'left',
+                }}
+              >
+                <ClockCounterClockwise size={16} color={era.color} weight="bold" />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 600, color: era.color }}>
+                    {era.era}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '1px' }}>
+                    {era.period} · Ver linha do tempo
+                  </div>
+                </div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-muted)' }}>›</span>
+              </button>
+            )
+          })()}
 
           <div style={{
             display: 'grid',

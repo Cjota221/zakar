@@ -1,16 +1,18 @@
-export default function TimelinePage() {
-  const eras = [
-    { label: 'Criação e Patriarcas', period: 'aprox. 4000–1800 a.C.', emoji: '🌅', books: 'Gênesis, Jó' },
-    { label: 'Escravidão e Êxodo', period: 'aprox. 1800–1400 a.C.', emoji: '🏜️', books: 'Êxodo, Levítico, Números, Deuteronômio' },
-    { label: 'Conquista e Juízes', period: 'aprox. 1400–1000 a.C.', emoji: '⚔️', books: 'Josué, Juízes, Rute' },
-    { label: 'Monarquia', period: 'aprox. 1000–586 a.C.', emoji: '👑', books: 'Samuel, Reis, Crônicas, Salmos, Provérbios...' },
-    { label: 'Exílio e Retorno', period: 'aprox. 586–400 a.C.', emoji: '🕍', books: 'Esdras, Neemias, Daniel, Profetas Menores' },
-    { label: 'Período Intertestamentário', period: 'aprox. 400–4 a.C.', emoji: '⏳', books: '(sem livros canônicos)' },
-    { label: 'NT e Igreja Primitiva', period: 'aprox. 4 a.C.–100 d.C.', emoji: '✝️', books: 'Evangelhos, Atos, Epístolas, Apocalipse' },
-  ]
+import { BIBLE_TIMELINE } from '@/lib/bible/timeline'
 
+export default function TimelinePage() {
   return (
-    <div className="page-enter" style={{ padding: '24px 16px' }}>
+    <div className="page-enter" style={{ padding: '24px 16px', paddingBottom: '100px' }}>
+      <div style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '10px',
+        color: 'var(--text-muted)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+        marginBottom: '4px',
+      }}>
+        Modo Cronológico
+      </div>
       <h1 style={{
         fontFamily: 'var(--font-display)',
         fontSize: '26px',
@@ -18,7 +20,7 @@ export default function TimelinePage() {
         color: 'var(--text-primary)',
         marginBottom: '6px',
       }}>
-        Linha do Tempo
+        A Bíblia na História
       </h1>
       <p style={{
         fontFamily: 'var(--font-body)',
@@ -26,10 +28,10 @@ export default function TimelinePage() {
         color: 'var(--text-muted)',
         marginBottom: '28px',
       }}>
-        A história bíblica em 7 eras
+        7 eras que contam a história da redenção
       </p>
 
-      <div style={{ position: 'relative', paddingLeft: '28px' }}>
+      <div style={{ position: 'relative', paddingLeft: '32px' }}>
         {/* Linha vertical */}
         <div style={{
           position: 'absolute',
@@ -38,20 +40,22 @@ export default function TimelinePage() {
           bottom: 0,
           width: '2px',
           background: 'var(--border-default)',
+          borderRadius: '2px',
         }} />
 
-        {eras.map((era, i) => (
-          <div key={i} style={{ position: 'relative', marginBottom: '20px' }}>
+        {BIBLE_TIMELINE.map((era, i) => (
+          <div key={era.id} style={{ position: 'relative', marginBottom: '20px' }}>
             {/* Dot */}
             <div style={{
               position: 'absolute',
-              left: '-24px',
-              top: '14px',
-              width: '10px',
-              height: '10px',
+              left: '-28px',
+              top: '18px',
+              width: '12px',
+              height: '12px',
               borderRadius: '50%',
-              background: 'var(--gold)',
+              background: era.color,
               border: '2px solid var(--bg-primary)',
+              boxShadow: `0 0 8px ${era.color}50`,
             }} />
 
             <div style={{
@@ -60,36 +64,69 @@ export default function TimelinePage() {
               borderRadius: 'var(--radius-md)',
               padding: '14px',
             }}>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '20px', lineHeight: 1.2, flexShrink: 0 }}>{era.emoji}</span>
-                <div>
-                  <p style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--text-primary)',
-                    marginBottom: '2px',
-                  }}>
-                    {era.label}
-                  </p>
-                  <p style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '10px',
-                    color: 'var(--gold)',
-                    marginBottom: '4px',
-                  }}>
-                    {era.period}
-                  </p>
-                  <p style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '11px',
-                    color: 'var(--text-muted)',
-                    lineHeight: 1.5,
-                  }}>
-                    {era.books}
-                  </p>
-                </div>
+              {/* Era header */}
+              <div style={{ marginBottom: '8px' }}>
+                <p style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  marginBottom: '2px',
+                }}>
+                  {era.era}
+                </p>
+                <p style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '10px',
+                  color: era.color,
+                  marginBottom: '4px',
+                }}>
+                  {era.period}
+                </p>
+                <p style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '11px',
+                  color: 'var(--text-muted)',
+                  lineHeight: 1.5,
+                  marginBottom: era.events.length > 0 ? '10px' : 0,
+                }}>
+                  {era.description}
+                </p>
               </div>
+
+              {/* Eventos */}
+              {era.events.length > 0 && (
+                <div style={{
+                  borderTop: '0.5px solid var(--border-default)',
+                  paddingTop: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                }}>
+                  {era.events.map((ev, j) => (
+                    <div key={j} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                      <div style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '9px',
+                        color: era.color,
+                        flexShrink: 0,
+                        minWidth: '72px',
+                        paddingTop: '2px',
+                      }}>
+                        {ev.year}
+                      </div>
+                      <div style={{
+                        fontFamily: 'var(--font-body)',
+                        fontSize: '11px',
+                        color: 'var(--text-secondary)',
+                        lineHeight: 1.4,
+                      }}>
+                        {ev.event}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}
