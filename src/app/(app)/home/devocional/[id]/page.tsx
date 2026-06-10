@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Sun, BookOpen } from '@phosphor-icons/react/dist/ssr'
+import { ShareVerse } from '@/components/biblia/ShareVerse'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -58,6 +59,12 @@ export default async function DevocionalPage({ params }: Props) {
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
           {new Date(devotional.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
         </span>
+        {devotional.verse_reference && devotional.verse_text && (
+          <ShareVerse
+            verseReference={devotional.verse_reference}
+            verseText={devotional.verse_text}
+          />
+        )}
       </div>
 
       <div style={{ padding: '24px 20px' }}>

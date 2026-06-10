@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card'
 import Link from 'next/link'
 import { Greeting } from '@/components/ui/Greeting'
 import { UserAvatar } from '@/components/ui/UserAvatar'
+import { ShareVerse } from '@/components/biblia/ShareVerse'
 
 type JourneyProgressWithJourney = {
   journeys?: {
@@ -156,25 +157,33 @@ export default async function HomePage() {
                 {devotional.content}
               </p>
 
-              <Link
-                href={`/home/devocional/${devotional.id}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--gold)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  textDecoration: 'none',
-                }}
-              >
-                Ler completo <ArrowRight size={14} />
-              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <Link
+                  href={`/home/devocional/${devotional.id}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--gold)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Ler completo <ArrowRight size={14} />
+                </Link>
+                {devotional.verse_reference && devotional.verse_text && (
+                  <ShareVerse
+                    verseReference={devotional.verse_reference}
+                    verseText={devotional.verse_text}
+                  />
+                )}
+              </div>
             </>
           ) : (
             <DevocionalSkeleton />
