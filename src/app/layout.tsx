@@ -8,9 +8,12 @@ export const metadata: Metadata = {
   description: 'O app de discipulado bíblico com memória real e contínua. Sua palavra certa, no momento certo.',
   manifest: '/manifest.json',
   icons: {
-    icon: [{ url: '/fivon-zakar.png', type: 'image/png' }],
-    apple: [{ url: '/fivon-zakar.png', type: 'image/png' }],
-    shortcut: '/fivon-zakar.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/fivon-zakar.png?v=2', type: 'image/png' },
+    ],
+    apple: [{ url: '/fivon-zakar.png?v=2', type: 'image/png' }],
+    shortcut: '/favicon.ico',
   },
   appleWebApp: {
     capable: true,

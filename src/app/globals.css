@@ -198,6 +198,118 @@ input, textarea {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* === HOME PAGE TOKENS === */
+:root {
+  --home-avatar-size:           52px;
+  --home-page-x:                16px;
+  --home-header-padding:        16px 16px 10px;
+  --home-section-gap:           12px;
+  --home-title-size:            26px;
+  --home-meta-size:             11px;
+  --home-eyebrow-size:          9px;
+  --home-card-padding:          16px;
+  --home-compact-card-padding:  12px;
+  --home-verse-ref-size:        11px;
+  --home-verse-size:            13px;
+  --home-body-size:             13px;
+  --home-link-size:             12px;
+  --home-section-title-size:    13px;
+  --home-era-heading-size:      15px;
+  --home-era-gap:               12px;
+  --home-era-card-width:        188px;
+  --home-era-card-padding:      14px;
+  --home-era-header-gap:        14px;
+  --home-era-icon-size:         34px;
+  --home-era-icon-font-size:    15px;
+  --home-era-period-size:       8px;
+  --home-era-period-width:      90px;
+  --home-era-title-size:        12px;
+  --home-era-subtitle-size:     10px;
+  --home-era-body-size:         10px;
+  --home-era-footer-size:       9px;
+}
+
+/* === HOME === */
+.home-page {
+  --home-page-x: 16px;
+  --home-header-padding: 16px 16px 14px;
+  --home-title-size: 26px;
+  --home-avatar-size: 48px;
+  --home-greeting-size: var(--font-size-sm);
+  --home-meta-size: 11px;
+  --streak-badge-gap: 5px;
+  --streak-badge-padding: 4px 10px;
+  --streak-badge-font-size: 11px;
+  --home-section-gap: 14px;
+  --home-card-padding: 18px;
+  --home-compact-card-padding: 14px 16px;
+  --home-eyebrow-size: 9px;
+  --home-verse-ref-size: 11px;
+  --home-verse-size: 13px;
+  --home-body-size: 13px;
+  --home-link-size: 12px;
+  --home-section-title-size: 13px;
+  --home-journey-icon-size: 38px;
+  --home-journey-emoji-size: 20px;
+  --home-journey-title-size: 13px;
+  --home-era-header-gap: 14px;
+  --home-era-heading-size: 15px;
+  --home-era-gap: 12px;
+  --home-era-card-width: 188px;
+  --home-era-card-padding: 14px;
+  --home-era-icon-size: 34px;
+  --home-era-icon-font-size: 15px;
+  --home-era-period-size: 8px;
+  --home-era-period-width: 90px;
+  --home-era-title-size: 12px;
+  --home-era-subtitle-size: 10px;
+  --home-era-body-size: 10px;
+  --home-era-footer-size: 9px;
+}
+
+@media (min-width: 900px) {
+  .home-page {
+    --home-page-x: 0px;
+    --home-header-padding: 8px 0 24px;
+    --home-title-size: 40px;
+    --home-avatar-size: 76px;
+    --home-greeting-size: 18px;
+    --home-meta-size: 13px;
+    --streak-badge-gap: 7px;
+    --streak-badge-padding: 7px 14px;
+    --streak-badge-font-size: 13px;
+    --home-section-gap: 24px;
+    --home-card-padding: 28px;
+    --home-compact-card-padding: 20px 22px;
+    --home-eyebrow-size: 12px;
+    --home-verse-ref-size: 14px;
+    --home-verse-size: 18px;
+    --home-body-size: 17px;
+    --home-link-size: 15px;
+    --home-section-title-size: 18px;
+    --home-journey-icon-size: 56px;
+    --home-journey-emoji-size: 28px;
+    --home-journey-title-size: 17px;
+    --home-era-header-gap: 18px;
+    --home-era-heading-size: 20px;
+    --home-era-gap: 16px;
+    --home-era-card-width: 248px;
+    --home-era-card-padding: 20px;
+    --home-era-icon-size: 48px;
+    --home-era-icon-font-size: 21px;
+    --home-era-period-size: 10px;
+    --home-era-period-width: 118px;
+    --home-era-title-size: 16px;
+    --home-era-subtitle-size: 13px;
+    --home-era-body-size: 13px;
+    --home-era-footer-size: 11px;
+  }
+}
+
 /* === APP SHELL === */
 .app-shell {
   min-height: 100dvh;

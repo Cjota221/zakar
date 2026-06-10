@@ -16,7 +16,7 @@ export function Greeting({ name }: { name: string }) {
   return (
     <p style={{
       fontFamily: 'var(--font-body)',
-      fontSize: 'var(--font-size-sm)',
+      fontSize: 'var(--home-greeting-size, var(--font-size-sm))',
       color: 'var(--text-muted)',
       marginBottom: '4px',
     }}>

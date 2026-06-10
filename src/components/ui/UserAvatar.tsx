@@ -1,10 +1,12 @@
 interface UserAvatarProps {
   avatarUrl?: string | null
   name?: string | null
-  size?: number
+  size?: number | string
 }
 
 export function UserAvatar({ avatarUrl, name, size = 36 }: UserAvatarProps) {
+  const initialsSize = typeof size === 'number' ? size * 0.36 : `calc(${size} * 0.36)`
+
   const initials = (() => {
     if (!name) return '?'
     const parts = name.trim().split(' ')
@@ -40,7 +42,7 @@ export function UserAvatar({ avatarUrl, name, size = 36 }: UserAvatarProps) {
         <span
           style={{
             fontFamily: 'var(--font-display)',
-            fontSize: size * 0.36,
+            fontSize: initialsSize,
             fontWeight: 700,
             color: '#D4AF37',
             lineHeight: 1,

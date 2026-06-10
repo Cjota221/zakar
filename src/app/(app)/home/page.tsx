@@ -62,37 +62,37 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="page-enter" style={{ padding: '0 0 8px' }}>
+    <div className="page-enter home-page" style={{ padding: '0 0 8px' }}>
       {/* Header */}
-      <div style={{ padding: '16px 16px 12px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+      <div style={{ padding: 'var(--home-header-padding)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <Greeting name={profile.name ?? ''} />
           <h1 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '26px',
+            fontSize: 'var(--home-title-size)',
             fontWeight: 700,
             color: 'var(--text-primary)',
-            lineHeight: 1.2,
+            lineHeight: 1.12,
           }}>
             Sua palavra de hoje
           </h1>
         </div>
         <Link href="/perfil" style={{ textDecoration: 'none', marginTop: '4px', flexShrink: 0 }}>
-          <UserAvatar avatarUrl={profile.avatar_url} name={profile.name} size={40} />
+          <UserAvatar avatarUrl={profile.avatar_url} name={profile.name} size="var(--home-avatar-size)" />
         </Link>
       </div>
 
       {/* Streak + XP */}
       <div style={{
-        padding: '0 16px 16px',
+        padding: '0 var(--home-page-x) var(--home-section-gap)',
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
+        gap: '12px',
       }}>
         <StreakBadge days={profile.streak_current} />
         <span style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
+          fontSize: 'var(--home-meta-size)',
           color: 'var(--text-muted)',
         }}>
           {profile.xp} XP · {levelNames[profile.level] ?? 'Semente'}
@@ -100,19 +100,20 @@ export default async function HomePage() {
       </div>
 
       {/* Despertar Zakar Card */}
-      <div style={{ margin: '0 16px 12px' }}>
+      <div style={{ margin: '0 var(--home-page-x) var(--home-section-gap)' }}>
         <Card
+          padding="var(--home-card-padding)"
           style={{
             borderColor: 'var(--gold-border)',
             background: 'var(--bg-card)',
           }}
         >
           {/* Eyebrow */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-            <Sun size={14} color="var(--gold)" weight="fill" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+            <Sun size={18} color="var(--gold)" weight="fill" />
             <span style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: '9px',
+              fontSize: 'var(--home-eyebrow-size)',
               color: 'var(--gold)',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
@@ -126,19 +127,19 @@ export default async function HomePage() {
               {/* Versículo */}
               <p style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: '11px',
+                fontSize: 'var(--home-verse-ref-size)',
                 color: 'var(--text-muted)',
-                marginBottom: '6px',
+                marginBottom: '8px',
               }}>
                 {devotional.verse_reference}
               </p>
               <p style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: '13px',
+                fontSize: 'var(--home-verse-size)',
                 fontStyle: 'italic',
                 color: '#CBD5E1',
                 lineHeight: 1.6,
-                marginBottom: '12px',
+                marginBottom: '16px',
               }}>
                 &ldquo;{devotional.verse_text}&rdquo;
               </p>
@@ -146,12 +147,12 @@ export default async function HomePage() {
               {/* Palavra gerada */}
               <p style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: '13px',
+                fontSize: 'var(--home-body-size)',
                 color: 'var(--text-secondary)',
                 lineHeight: 1.7,
-                marginBottom: '16px',
+                marginBottom: '20px',
                 display: '-webkit-box',
-                WebkitLineClamp: 3,
+                WebkitLineClamp: 4,
                 WebkitBoxOrient: 'vertical' as const,
                 overflow: 'hidden',
               }}>
@@ -166,7 +167,7 @@ export default async function HomePage() {
                     alignItems: 'center',
                     gap: '6px',
                     fontFamily: 'var(--font-display)',
-                    fontSize: '12px',
+                    fontSize: 'var(--home-link-size)',
                     fontWeight: 600,
                     color: 'var(--gold)',
                     background: 'none',
@@ -193,19 +194,19 @@ export default async function HomePage() {
       </div>
 
       {/* Estude a Bíblia — eras históricas */}
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: 'var(--home-section-gap)' }}>
         <EraCards />
       </div>
 
       {/* Jornada ativa */}
       {activeJourney && (
-        <div style={{ padding: '0 16px' }}>
+        <div style={{ padding: '0 var(--home-page-x)' }}>
           <p style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '13px',
+            fontSize: 'var(--home-section-title-size)',
             fontWeight: 600,
             color: 'var(--text-primary)',
-            marginBottom: '10px',
+            marginBottom: '12px',
           }}>
             Sua jornada ativa
           </p>
@@ -213,17 +214,17 @@ export default async function HomePage() {
             href={`/jornadas/${activeJourney.journey_id}`}
             style={{ display: 'block', textDecoration: 'none' }}
           >
-            <Card padding="12px">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Card padding="var(--home-compact-card-padding)">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{
-                  width: '38px',
-                  height: '38px',
+                  width: 'var(--home-journey-icon-size)',
+                  height: 'var(--home-journey-icon-size)',
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--olive-dim)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
+                  fontSize: 'var(--home-journey-emoji-size)',
                   flexShrink: 0,
                 }}>
                   🌿
@@ -231,10 +232,10 @@ export default async function HomePage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '12px',
+                    fontSize: 'var(--home-journey-title-size)',
                     fontWeight: 600,
                     color: 'var(--text-primary)',
-                    marginBottom: '2px',
+                    marginBottom: '4px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -243,9 +244,9 @@ export default async function HomePage() {
                   </p>
                   <p style={{
                     fontFamily: 'var(--font-body)',
-                    fontSize: '10px',
+                    fontSize: 'var(--home-meta-size)',
                     color: 'var(--text-muted)',
-                    marginBottom: '6px',
+                    marginBottom: '8px',
                   }}>
                     Dia {activeJourney.current_day} de 7
                   </p>
@@ -268,27 +269,27 @@ export default async function HomePage() {
 
       {/* CTA sem jornada */}
       {!activeJourney && (
-        <div style={{ padding: '0 16px' }}>
+        <div style={{ padding: '0 var(--home-page-x)' }}>
           <Link
             href="/jornadas"
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '14px 16px',
+              padding: 'var(--home-compact-card-padding)',
               background: 'var(--gold-dim)',
               border: '1px solid var(--gold-border)',
               borderRadius: 'var(--radius-md)',
               textDecoration: 'none',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <BookmarkSimple size={20} color="var(--gold)" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <BookmarkSimple size={24} color="var(--gold)" />
               <div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 600, color: 'var(--gold)' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--home-journey-title-size)', fontWeight: 600, color: 'var(--gold)' }}>
                   Escolher uma jornada
                 </p>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--home-meta-size)', color: 'var(--text-muted)' }}>
                   Planos de 7 dias com guia da IA
                 </p>
               </div>

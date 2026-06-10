@@ -10,18 +10,18 @@ export default function StreakBadge({ days }: StreakBadgeProps) {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: '5px',
+        gap: 'var(--streak-badge-gap, 5px)',
         background: 'var(--gold-dim)',
         border: '0.5px solid var(--gold-border)',
         borderRadius: 'var(--radius-pill)',
-        padding: '4px 10px',
+        padding: 'var(--streak-badge-padding, 4px 10px)',
       }}
     >
-      <Fire size={14} color="var(--gold)" weight="fill" />
+      <Fire size={16} color="var(--gold)" weight="fill" />
       <span
         style={{
           fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
+          fontSize: 'var(--streak-badge-font-size, 11px)',
           color: 'var(--gold)',
         }}
       >

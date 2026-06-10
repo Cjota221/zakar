@@ -9,7 +9,7 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/fivon-zakar.png",
+      "src": "/fivon-zakar.png?v=2",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any maskable"
