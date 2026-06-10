@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BottomNav from '@/components/ui/BottomNav'
+import { InstallBanner } from '@/components/pwa/InstallBanner'
 
 export default async function AppLayout({
   children,
@@ -20,6 +21,7 @@ export default async function AppLayout({
     <div className="app-shell">
       <main className="app-main">{children}</main>
       <BottomNav />
+      <InstallBanner />
     </div>
   )
 }
