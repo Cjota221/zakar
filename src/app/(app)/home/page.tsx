@@ -7,6 +7,7 @@ import StreakBadge from '@/components/gamification/StreakBadge'
 import Card from '@/components/ui/Card'
 import Link from 'next/link'
 import { Greeting } from '@/components/ui/Greeting'
+import { UserAvatar } from '@/components/ui/UserAvatar'
 
 type JourneyProgressWithJourney = {
   journeys?: {
@@ -23,7 +24,7 @@ export default async function HomePage() {
   const [profileResult, devotionalResult, progressResult] = await Promise.all([
     supabase
       .from('user_profiles')
-      .select('name, streak_current, xp, level')
+      .select('name, streak_current, xp, level, avatar_url')
       .eq('id', user.id)
       .single(),
     supabase
@@ -61,17 +62,22 @@ export default async function HomePage() {
   return (
     <div className="page-enter" style={{ padding: '0 0 8px' }}>
       {/* Header */}
-      <div style={{ padding: '16px 16px 12px' }}>
-        <Greeting name={profile.name ?? ''} />
-        <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '26px',
-          fontWeight: 700,
-          color: 'var(--text-primary)',
-          lineHeight: 1.2,
-        }}>
-          Sua palavra de hoje
-        </h1>
+      <div style={{ padding: '16px 16px 12px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Greeting name={profile.name ?? ''} />
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '26px',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            lineHeight: 1.2,
+          }}>
+            Sua palavra de hoje
+          </h1>
+        </div>
+        <Link href="/perfil" style={{ textDecoration: 'none', marginTop: '4px', flexShrink: 0 }}>
+          <UserAvatar avatarUrl={profile.avatar_url} name={profile.name} size={40} />
+        </Link>
       </div>
 
       {/* Streak + XP */}
