@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: agent === 'professor' ? 4096 : 1024,
         messages: [
           { role: 'system', content: systemPrompt + userContext + bibleContext + eraContext },
