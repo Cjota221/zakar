@@ -1,0 +1,173 @@
+{
+  "name": "ZAKAR — Workflow 2: Roteamento de Agentes",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Webhook Entrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "path": "zakar-chat",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Classificar Intenção",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: 'Você é um classificador de intenção bíblica. Analise a mensagem e responda APENAS com uma dessas palavras:\\n\\nhiistoriador - perguntas sobre Antigo Testamento, história, contexto, reis, profetas\\nconselheiro - Salmos, Provérbios, Eclesiastes, Jó, questões emocionais, decisões de vida\\ndoutrinador - Novo Testamento, Jesus, graça, salvação, Paulo, Apocalipse\\nespecialista - temas transversais, personagens específicos, cruzando AT e NT\\ngeral - não se encaixa claramente\\n\\nMensagem: ' + $json.body.message }], temperature: 0, max_tokens: 10 }) }}"
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Groq API" } }
+    },
+    {
+      "id": "n3",
+      "name": "Extrair Agente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300],
+      "parameters": {
+        "jsCode": "const classificacao = $json.choices[0].message.content.trim().toLowerCase();\nconst agentesValidos = ['historiador', 'conselheiro', 'doutrinador', 'especialista'];\nconst agente = agentesValidos.includes(classificacao) ? classificacao : 'conselheiro';\n\nreturn {\n  agente,\n  user_id: $('Webhook Entrada').item.json.body.user_id,\n  message: $('Webhook Entrada').item.json.body.message,\n  context_book: $('Webhook Entrada').item.json.body.context_book || null,\n  context_chapter: $('Webhook Entrada').item.json.body.context_chapter || null,\n  context_verse: $('Webhook Entrada').item.json.body.context_verse || null,\n  verse_text: $('Webhook Entrada').item.json.body.verse_text || null\n};"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Buscar Memória RAG",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://jrurldwpanxpkomcmxsz.supabase.co/rest/v1/rpc/buscar_memoria_usuario",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpCustomAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ p_user_id: $json.user_id, p_limit: 5 }) }}"
+      },
+      "credentials": { "httpCustomAuth": { "name": "Supabase Zakar" } }
+    },
+    {
+      "id": "n5",
+      "name": "Buscar Perfil do Usuário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "https://jrurldwpanxpkomcmxsz.supabase.co/rest/v1/user_profiles",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpCustomAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $('Extrair Agente').item.json.user_id }}" },
+            { "name": "select", "value": "name,life_stage" },
+            { "name": "limit", "value": "1" }
+          ]
+        }
+      },
+      "credentials": { "httpCustomAuth": { "name": "Supabase Zakar" } }
+    },
+    {
+      "id": "n6",
+      "name": "Montar Prompt do Agente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300],
+      "parameters": {
+        "jsCode": "const dados = $('Extrair Agente').item.json;\nconst memorias = $('Buscar Memória RAG').all().map(m => m.json.content).filter(Boolean).join('\\n- ');\nconst perfil = $('Buscar Perfil do Usuário').first().json;\n\nconst systemPrompts = {\n  historiador: 'Você é O Historiador, agente do Zakar especializado em Antigo Testamento. Sua especialidade: contexto histórico, reis de Israel e Judá, profetas, arqueologia bíblica. Tom: professoral, apaixonado, conta histórias com detalhes vívidos.',\n  conselheiro: 'Você é O Conselheiro, agente do Zakar especializado em Livros de Sabedoria. Sua especialidade: Salmos, Provérbios, Eclesiastes, Jó. Aplica o texto bíblico à vida real do usuário com empatia e cuidado.',\n  doutrinador: 'Você é O Doutrinador, agente do Zakar especializado em Novo Testamento. Sua especialidade: Evangelhos, Epístolas de Paulo, graça, salvação. Tom: firme, claro, acessível.',\n  especialista: 'Você é A Especialista Temática, agente do Zakar. Sua especialidade: temas transversais por toda a Bíblia, biografias bíblicas, tipologia. Tom: entusiasmado, conecta pontos fascinantes.'\n};\n\nconst system = systemPrompts[dados.agente] || systemPrompts.conselheiro;\nconst contextoPerfil = perfil ? `- Nome: ${perfil.name}\\n- Momento de vida: ${perfil.life_stage}` : '';\nconst contextoMemoria = memorias ? `- Fragmentos de memória:\\n- ${memorias}` : '- Sem histórico ainda.';\nconst contextoLeitura = dados.verse_text ? `- Leitura atual: ${dados.context_book} ${dados.context_chapter}:${dados.context_verse}\\n- Texto: \"${dados.verse_text}\"` : '';\n\nconst userPrompt = `CONTEXTO DO USUÁRIO:\\n${contextoPerfil}\\n${contextoMemoria}\\n${contextoLeitura}\\n\\nREGRAS:\\n1. Máximo 250 palavras\\n2. Nunca invente textos bíblicos\\n3. Finalize com uma pergunta ou reflexão\\n4. Linguagem acessível\\n\\nPergunta: ${dados.message}`;\n\nreturn { agente: dados.agente, user_id: dados.user_id, message: dados.message, system_prompt: system, user_prompt: userPrompt };"
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Chamar Groq — Agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'llama3-70b-8192', messages: [{ role: 'system', content: $json.system_prompt }, { role: 'user', content: $json.user_prompt }], temperature: 0.75, max_tokens: 600 }) }}"
+      },
+      "credentials": { "httpHeaderAuth": { "name": "Groq API" } }
+    },
+    {
+      "id": "n8",
+      "name": "Extrair Resposta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300],
+      "parameters": {
+        "jsCode": "const resposta = $json.choices[0].message.content;\nconst dados = $('Montar Prompt do Agente').item.json;\nreturn { resposta, agente: dados.agente, user_id: dados.user_id, pergunta: dados.message };"
+      }
+    },
+    {
+      "id": "n9",
+      "name": "Salvar Fragmento de Memória",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2000, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://jrurldwpanxpkomcmxsz.supabase.co/rest/v1/memory_fragments",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpCustomAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ user_id: $json.user_id, content: 'Usuário perguntou: ' + $json.pergunta, type: 'conversa' }) }}"
+      },
+      "credentials": { "httpCustomAuth": { "name": "Supabase Zakar" } }
+    },
+    {
+      "id": "n10",
+      "name": "Retornar Resposta",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2220, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { resposta: $('Extrair Resposta').item.json.resposta, agente: $('Extrair Resposta').item.json.agente } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [{ "name": "Content-Type", "value": "application/json" }]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Entrada": { "main": [[{ "node": "Classificar Intenção", "type": "main", "index": 0 }]] },
+    "Classificar Intenção": { "main": [[{ "node": "Extrair Agente", "type": "main", "index": 0 }]] },
+    "Extrair Agente": { "main": [[{ "node": "Buscar Memória RAG", "type": "main", "index": 0 }]] },
+    "Buscar Memória RAG": { "main": [[{ "node": "Buscar Perfil do Usuário", "type": "main", "index": 0 }]] },
+    "Buscar Perfil do Usuário": { "main": [[{ "node": "Montar Prompt do Agente", "type": "main", "index": 0 }]] },
+    "Montar Prompt do Agente": { "main": [[{ "node": "Chamar Groq — Agente", "type": "main", "index": 0 }]] },
+    "Chamar Groq — Agente": { "main": [[{ "node": "Extrair Resposta", "type": "main", "index": 0 }]] },
+    "Extrair Resposta": { "main": [[{ "node": "Salvar Fragmento de Memória", "type": "main", "index": 0 }]] },
+    "Salvar Fragmento de Memória": { "main": [[{ "node": "Retornar Resposta", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "America/Sao_Paulo" },
+  "tags": []
+}

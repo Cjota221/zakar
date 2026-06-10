@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { Greeting } from '@/components/ui/Greeting'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ShareVerse } from '@/components/biblia/ShareVerse'
+import { EraCards } from '@/components/study/EraCards'
 
 type JourneyProgressWithJourney = {
   journeys?: {
@@ -189,6 +190,11 @@ export default async function HomePage() {
             <DevocionalSkeleton />
           )}
         </Card>
+      </div>
+
+      {/* Estude a Bíblia — eras históricas */}
+      <div style={{ marginBottom: '12px' }}>
+        <EraCards />
       </div>
 
       {/* Jornada ativa */}
