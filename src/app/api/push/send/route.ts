@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
-import webpush from 'web-push'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
@@ -10,11 +9,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  webpush.setVapidDetails(
-    process.env.VAPID_EMAIL!,
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-  )
+  const vapidEmail = process.env.VAPID_EMAIL
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
+
+  if (!vapidEmail || !vapidPublicKey || !vapidPrivateKey) {
+    return NextResponse.json({ error: 'Push notifications not configured' }, { status: 503 })
+  }
+
+  // Dynamic import prevents web-push from being evaluated at build time
+  const webpush = (await import('web-push')).default
+  webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey)
 
   const { userId, title, body, url } = await req.json()
 
