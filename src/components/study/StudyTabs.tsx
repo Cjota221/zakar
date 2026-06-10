@@ -137,7 +137,7 @@ function ConteudoTab({ era, onAskProfessor }: { era: EraContent; onAskProfessor:
                   {v.reference}
                 </div>
                 <button
-                  onClick={() => router.push(`/biblia?book=${v.bookAbbr}&chapter=${v.chapter}`)}
+                  onClick={() => router.push(`/biblia/${v.bookAbbr}/${v.chapter}?versiculo=${v.verse}&highlight=true`)}
                   style={{
                     background: 'none', border: `1px solid ${era.color}30`, borderRadius: 6,
                     padding: '2px 8px', cursor: 'pointer',

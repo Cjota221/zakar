@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { House, BookOpen, Path, User } from '@phosphor-icons/react'
+import { House, BookOpen, HandsPraying, Path, User } from '@phosphor-icons/react'
 
 const navItems = [
   { href: '/home',     label: 'Home',    Icon: House },
   { href: '/biblia',   label: 'Bíblia',  Icon: BookOpen },
+  { href: '/oracoes',  label: 'Orações', Icon: HandsPraying },
   { href: '/jornadas', label: 'Jornadas', Icon: Path },
   { href: '/perfil',   label: 'Perfil',  Icon: User },
 ]

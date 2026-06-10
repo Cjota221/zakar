@@ -42,7 +42,7 @@ export default async function JornadaDetailPage({ params }: Props) {
       current_day: 1,
       status: 'active',
     }, { onConflict: 'user_id,journey_id' })
-    redirect(`/jornadas/${id}`)
+    redirect(`/jornadas/${id}/dia/1`)
   }
 
   const currentDay = progress?.current_day ?? 0
@@ -128,9 +128,10 @@ export default async function JornadaDetailPage({ params }: Props) {
 
         {/* Botão iniciar/continuar */}
         {!isCompleted && (
-          <form action={startJourney}>
+          <form action={isActive ? undefined : startJourney} onSubmit={isActive ? (e) => { e.preventDefault() } : undefined}>
             <button
-              type="submit"
+              type={isActive ? 'button' : 'submit'}
+              onClick={isActive ? () => { window.location.href = `/jornadas/${id}/dia/${currentDay}` } : undefined}
               style={{
                 width: '100%',
                 padding: '14px',

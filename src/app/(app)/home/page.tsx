@@ -10,6 +10,7 @@ import { Greeting } from '@/components/ui/Greeting'
 import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ShareVerse } from '@/components/biblia/ShareVerse'
 import { EraCards } from '@/components/study/EraCards'
+import { DailyPsalmCard } from '@/components/home/DailyPsalmCard'
 
 type JourneyProgressWithJourney = {
   journeys?: {
@@ -192,6 +193,9 @@ export default async function HomePage() {
           )}
         </Card>
       </div>
+
+      {/* Salmo do Dia */}
+      <DailyPsalmCard />
 
       {/* Estude a Bíblia — eras históricas */}
       <div style={{ marginBottom: 'var(--home-section-gap)' }}>
