@@ -13,10 +13,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark')
 
   useEffect(() => {
-    const saved = localStorage.getItem('zakar-theme') as Theme | null
-    const resolved = saved ?? 'dark'
-    setTheme(resolved)
-    document.documentElement.setAttribute('data-theme', resolved)
+    queueMicrotask(() => {
+      const saved = localStorage.getItem('zakar-theme') as Theme | null
+      const resolved = saved ?? 'dark'
+      setTheme(resolved)
+      document.documentElement.setAttribute('data-theme', resolved)
+    })
   }, [])
 
   const toggle = () => {

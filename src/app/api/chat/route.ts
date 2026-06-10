@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ response: agentResponse })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Erro ao chamar a IA' }, { status: 500 })
   }
 }

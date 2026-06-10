@@ -17,10 +17,8 @@ export default async function AppLayout({
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg-primary)' }}>
-      <main style={{ paddingBottom: '80px' }}>
-        {children}
-      </main>
+    <div className="app-shell">
+      <main className="app-main">{children}</main>
       <BottomNav />
     </div>
   )

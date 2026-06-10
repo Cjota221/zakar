@@ -8,6 +8,12 @@ import Card from '@/components/ui/Card'
 import Link from 'next/link'
 import { Greeting } from '@/components/ui/Greeting'
 
+type JourneyProgressWithJourney = {
+  journeys?: {
+    title?: string | null
+  } | null
+}
+
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -38,6 +44,7 @@ export default async function HomePage() {
   const profile = profileResult.data
   const devotional = devotionalResult.data
   const activeJourney = progressResult.data
+  const activeJourneyDetails = activeJourney as JourneyProgressWithJourney | null
 
   if (!profile) redirect('/onboarding')
 
@@ -211,7 +218,7 @@ export default async function HomePage() {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}>
-                    {(activeJourney as any).journeys?.title}
+                    {activeJourneyDetails?.journeys?.title}
                   </p>
                   <p style={{
                     fontFamily: 'var(--font-body)',

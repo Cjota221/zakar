@@ -197,3 +197,115 @@ input, textarea {
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* === APP SHELL === */
+.app-shell {
+  min-height: 100dvh;
+  background: var(--bg-primary);
+}
+
+.app-main {
+  width: 100%;
+  min-height: 100dvh;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+.app-nav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  justify-content: space-around;
+  background: var(--bg-card);
+  border-top: 0.5px solid var(--border-default);
+}
+
+.app-nav-link {
+  display: flex;
+  min-width: 64px;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.app-nav-label {
+  display: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.app-nav-link-active {
+  color: var(--gold);
+}
+
+.app-nav-link-active .app-nav-label {
+  display: inline;
+}
+
+@media (min-width: 900px) {
+  .app-shell {
+    display: flex;
+    justify-content: center;
+    padding-left: 220px;
+  }
+
+  .app-main {
+    max-width: 760px;
+    padding: 24px 32px 56px;
+  }
+
+  .app-nav {
+    top: 0;
+    right: auto;
+    bottom: 0;
+    width: 220px;
+    height: 100dvh;
+    padding: 28px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 8px;
+    border-top: 0;
+    border-right: 0.5px solid var(--border-default);
+  }
+
+  .app-nav-link {
+    min-width: 0;
+    min-height: 48px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .app-nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+
+  .app-nav-label {
+    display: inline;
+    font-size: var(--font-size-sm);
+  }
+
+  .app-nav-link-active {
+    background: var(--gold-dim);
+  }
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 function getGreeting(hour: number) {
   if (hour < 12) return 'Bom dia'
@@ -9,11 +9,7 @@ function getGreeting(hour: number) {
 }
 
 export function Greeting({ name }: { name: string }) {
-  const [greeting, setGreeting] = useState('')
-
-  useEffect(() => {
-    setGreeting(getGreeting(new Date().getHours()))
-  }, [])
+  const [greeting] = useState(() => getGreeting(new Date().getHours()))
 
   if (!greeting) return null
 

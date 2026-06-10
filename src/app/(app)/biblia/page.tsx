@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { CaretLeft, CaretRight, BookOpen, MagnifyingGlass, X, ArrowLeft } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, MagnifyingGlass, X, ArrowLeft } from '@phosphor-icons/react'
 import { fetchBookIndex, fetchBook, BOOK_GROUPS, type BookMeta, type BibleBook } from '@/lib/bible'
 
 type View = 'index' | 'chapters' | 'reader'
@@ -56,7 +56,7 @@ export default function BibliaPage() {
         position: 'sticky',
         top: 0,
         zIndex: 10,
-        background: 'var(--bg-base)',
+        background: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border-default)',
         padding: '12px 16px',
       }}>

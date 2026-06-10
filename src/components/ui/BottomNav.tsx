@@ -15,55 +15,22 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '64px',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-        background: 'var(--bg-card)',
-        borderTop: '0.5px solid var(--border-default)',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        zIndex: 100,
-      }}
-    >
+    <nav className="app-nav">
       {navItems.map(({ href, label, Icon }) => {
         const active = pathname.startsWith(href)
         return (
           <Link
             key={href}
             href={href}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '3px',
-              padding: '8px 16px',
-              textDecoration: 'none',
-            }}
+            className={`app-nav-link ${active ? 'app-nav-link-active' : ''}`}
+            aria-label={label}
           >
             <Icon
               size={26}
               weight={active ? 'fill' : 'regular'}
-              color={active ? 'var(--gold)' : 'var(--text-muted)'}
+              color="currentColor"
             />
-            {active && (
-              <span
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  color: 'var(--gold)',
-                  lineHeight: 1,
-                }}
-              >
-                {label}
-              </span>
-            )}
+            <span className="app-nav-label">{label}</span>
           </Link>
         )
       })}

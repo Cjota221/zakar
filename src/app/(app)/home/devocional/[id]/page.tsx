@@ -85,7 +85,7 @@ export default async function DevocionalPage({ params }: Props) {
                 fontStyle: 'italic', color: 'var(--text-primary)',
                 lineHeight: 1.7,
               }}>
-                "{devotional.verse_text}"
+                &ldquo;{devotional.verse_text}&rdquo;
               </p>
             )}
           </div>

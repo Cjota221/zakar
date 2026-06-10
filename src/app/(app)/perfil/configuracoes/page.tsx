@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Gear, Trash, Key, Globe } from '@phosphor-icons/react/dist/ssr'
+import { ArrowLeft, Gear, Trash, Key } from '@phosphor-icons/react/dist/ssr'
 import { FontScaleSlider } from '@/components/ui/FontScaleSlider'
 
 export default async function ConfiguracoesPage() {

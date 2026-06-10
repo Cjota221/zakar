@@ -23,12 +23,15 @@ export function FontScaleProvider({ children }: { children: React.ReactNode }) {
   const [scaleIndex, setScaleIndexState] = useState(2)
 
   useEffect(() => {
-    const saved = localStorage.getItem('zakar-font-scale')
-    if (saved !== null) {
-      const idx = Number(saved)
-      setScaleIndexState(idx)
-      document.documentElement.style.setProperty('--font-scale', String(SCALE_VALUES[idx]))
-    }
+    queueMicrotask(() => {
+      const saved = localStorage.getItem('zakar-font-scale')
+      if (saved !== null) {
+        const idx = Number(saved)
+        const nextIndex = Number.isInteger(idx) && SCALE_VALUES[idx] ? idx : 2
+        setScaleIndexState(nextIndex)
+        document.documentElement.style.setProperty('--font-scale', String(SCALE_VALUES[nextIndex]))
+      }
+    })
   }, [])
 
   const setScaleIndex = (i: number) => {

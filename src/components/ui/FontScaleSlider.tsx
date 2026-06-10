@@ -42,7 +42,7 @@ export function FontScaleSlider() {
         background: 'var(--bg-secondary)',
         borderRadius: 'var(--radius-sm)',
       }}>
-        "Seja forte e corajoso! Não se apavore nem desanime..."
+        &ldquo;Seja forte e corajoso! Não se apavore nem desanime...&rdquo;
       </div>
 
       {/* Slider */}
