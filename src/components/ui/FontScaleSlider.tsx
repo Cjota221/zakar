@@ -2,6 +2,9 @@
 
 import { useFontScale } from '@/lib/contexts/FontScaleContext'
 
+const LEVELS = [0.85, 0.92, 1, 1.1, 1.25]
+const LABELS = ['AA', 'A', 'Aa', 'A+', 'A++']
+
 export function FontScaleSlider() {
   const { scaleIndex, setScaleIndex, scaleLabel } = useFontScale()
 
@@ -19,7 +22,7 @@ export function FontScaleSlider() {
           fontWeight: 600,
           color: 'var(--text-primary)',
         }}>
-          Tamanho do texto
+          Tamanho da Fonte
         </span>
         <span style={{
           fontFamily: 'var(--font-mono)',
@@ -45,42 +48,33 @@ export function FontScaleSlider() {
         &ldquo;Seja forte e corajoso! Não se apavore nem desanime...&rdquo;
       </div>
 
-      {/* Slider */}
-      <input
-        type="range"
-        min={0}
-        max={4}
-        step={1}
-        value={scaleIndex}
-        onChange={e => setScaleIndex(Number(e.target.value))}
-        style={{
-          width: '100%',
-          accentColor: 'var(--gold)',
-          height: '4px',
-          cursor: 'pointer',
-          display: 'block',
-        }}
-      />
-
-      {/* A crescente clicável */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
-        {[11, 13, 15, 18, 21].map((size, i) => (
+      {/* Botões de nível */}
+      <div className="flex items-center gap-2" style={{ display: 'flex', gap: '8px' }}>
+        {LEVELS.map((_, i) => (
           <button
             key={i}
             onClick={() => setScaleIndex(i)}
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: `${size}px`,
-              fontWeight: scaleIndex === i ? 700 : 400,
-              color: scaleIndex === i ? 'var(--gold)' : 'var(--text-muted)',
+              flex: 1,
+              padding: '8px 4px',
+              borderRadius: '8px',
+              border: `1px solid ${scaleIndex === i ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
+              background: scaleIndex === i ? 'rgba(212,175,55,0.1)' : 'transparent',
+              color: scaleIndex === i ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
               cursor: 'pointer',
-              transition: 'color 0.15s',
-              background: 'none',
-              border: 'none',
-              padding: '4px 8px',
+              fontSize: `${12 + i * 2}px`,
+              fontWeight: scaleIndex === i ? 700 : 400,
+              transition: 'all 0.15s',
+              fontFamily: 'var(--font-display)',
+            }}
+            onMouseEnter={e => {
+              if (scaleIndex !== i) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+            }}
+            onMouseLeave={e => {
+              if (scaleIndex !== i) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
             }}
           >
-            A
+            {LABELS[i]}
           </button>
         ))}
       </div>

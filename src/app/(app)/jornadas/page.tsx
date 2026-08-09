@@ -30,7 +30,7 @@ export default async function JornadasPage() {
     <div className="page-enter" style={{ padding: '24px 16px' }}>
       <h1 style={{
         fontFamily: 'var(--font-display)',
-        fontSize: '26px',
+        fontSize: 'var(--font-size-xl)',
         fontWeight: 700,
         color: 'var(--text-primary)',
         marginBottom: '6px',
@@ -39,7 +39,7 @@ export default async function JornadasPage() {
       </h1>
       <p style={{
         fontFamily: 'var(--font-body)',
-        fontSize: '14px',
+        fontSize: 'var(--font-size-sm)',
         color: 'var(--text-muted)',
         marginBottom: '24px',
       }}>
@@ -78,7 +78,7 @@ export default async function JornadasPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                       <p style={{
                         fontFamily: 'var(--font-display)',
-                        fontSize: '14px',
+                        fontSize: 'var(--font-size-sm)',
                         fontWeight: 600,
                         color: 'var(--text-primary)',
                         overflow: 'hidden',
@@ -93,7 +93,7 @@ export default async function JornadasPage() {
                     </div>
                     <p style={{
                       fontFamily: 'var(--font-body)',
-                      fontSize: '12px',
+                      fontSize: 'var(--font-size-xs)',
                       color: 'var(--text-muted)',
                       marginBottom: isActive ? '8px' : 0,
                     }}>
@@ -123,7 +123,7 @@ export default async function JornadasPage() {
         })}
 
         {(!journeys || journeys.length === 0) && (
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', paddingTop: '32px' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', textAlign: 'center', paddingTop: '32px' }}>
             Nenhuma jornada disponível ainda.
           </p>
         )}

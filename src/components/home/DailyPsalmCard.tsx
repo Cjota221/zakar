@@ -25,10 +25,10 @@ export function DailyPsalmCard() {
           <MusicNotes size={18} color="var(--gold)" weight="fill" />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>
             Salmo do Dia
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--text-primary)' }}>
             Salmo {psalmNum}
           </div>
         </div>

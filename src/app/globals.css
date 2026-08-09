@@ -10,11 +10,11 @@
   --font-scale: 1;
   --font-size-xs:   calc(13px * var(--font-scale));
   --font-size-sm:   calc(15px * var(--font-scale));
-  --font-size-base: calc(17px * var(--font-scale));
-  --font-size-md:   calc(19px * var(--font-scale));
-  --font-size-lg:   calc(24px * var(--font-scale));
-  --font-size-xl:   calc(30px * var(--font-scale));
-  --font-size-2xl:  calc(34px * var(--font-scale));
+  --font-size-base: calc(16px * var(--font-scale));
+  --font-size-md:   calc(18px * var(--font-scale));
+  --font-size-lg:   calc(22px * var(--font-scale));
+  --font-size-xl:   calc(28px * var(--font-scale));
+  --font-size-2xl:  calc(32px * var(--font-scale));
 
   /* === BACKGROUNDS (Light Mode) === */
   --bg-primary:   #F9F9F6;
@@ -106,7 +106,17 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: calc(16px * var(--font-scale));
 }
+
+p, span, li, div, button, input, textarea, label {
+  font-size: calc(1rem * var(--font-scale));
+}
+
+h1 { font-size: calc(2rem * var(--font-scale)); }
+h2 { font-size: calc(1.5rem * var(--font-scale)); }
+h3 { font-size: calc(1.25rem * var(--font-scale)); }
+h4 { font-size: calc(1.125rem * var(--font-scale)); }
 
 button {
   cursor: pointer;
@@ -181,6 +191,37 @@ input, textarea {
   border-radius: var(--radius-sm);
 }
 
+/* Skeleton variants */
+.skeleton-text {
+  height: 14px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-text-sm {
+  height: 12px;
+  width: 60%;
+  margin-bottom: 6px;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 70%;
+  margin-bottom: 12px;
+}
+
+.skeleton-card {
+  height: 120px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.skeleton-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
 /* === SCROLLBAR CUSTOM (WebKit) === */
 ::-webkit-scrollbar {
   width: 4px;
@@ -207,30 +248,30 @@ input, textarea {
   --home-avatar-size:           52px;
   --home-page-x:                16px;
   --home-header-padding:        16px 16px 10px;
-  --home-section-gap:           12px;
+  --home-section-gap:           16px;
   --home-title-size:            26px;
-  --home-meta-size:             11px;
-  --home-eyebrow-size:          9px;
+  --home-meta-size:             13px;
+  --home-eyebrow-size:          11px;
   --home-card-padding:          16px;
   --home-compact-card-padding:  12px;
-  --home-verse-ref-size:        11px;
-  --home-verse-size:            13px;
-  --home-body-size:             13px;
-  --home-link-size:             12px;
-  --home-section-title-size:    13px;
-  --home-era-heading-size:      15px;
+  --home-verse-ref-size:        14px;
+  --home-verse-size:            15px;
+  --home-body-size:             15px;
+  --home-link-size:             14px;
+  --home-section-title-size:    15px;
+  --home-era-heading-size:      17px;
   --home-era-gap:               12px;
   --home-era-card-width:        188px;
   --home-era-card-padding:      14px;
   --home-era-header-gap:        14px;
   --home-era-icon-size:         34px;
   --home-era-icon-font-size:    15px;
-  --home-era-period-size:       8px;
+  --home-era-period-size:       10px;
   --home-era-period-width:      90px;
-  --home-era-title-size:        12px;
-  --home-era-subtitle-size:     10px;
-  --home-era-body-size:         10px;
-  --home-era-footer-size:       9px;
+  --home-era-title-size:        14px;
+  --home-era-subtitle-size:     12px;
+  --home-era-body-size:         12px;
+  --home-era-footer-size:       11px;
 }
 
 /* === HOME === */
@@ -240,35 +281,35 @@ input, textarea {
   --home-title-size: 26px;
   --home-avatar-size: 48px;
   --home-greeting-size: var(--font-size-sm);
-  --home-meta-size: 11px;
+  --home-meta-size: 13px;
   --streak-badge-gap: 5px;
   --streak-badge-padding: 4px 10px;
-  --streak-badge-font-size: 11px;
-  --home-section-gap: 14px;
+  --streak-badge-font-size: 13px;
+  --home-section-gap: 16px;
   --home-card-padding: 18px;
   --home-compact-card-padding: 14px 16px;
-  --home-eyebrow-size: 9px;
-  --home-verse-ref-size: 11px;
-  --home-verse-size: 13px;
-  --home-body-size: 13px;
-  --home-link-size: 12px;
-  --home-section-title-size: 13px;
+  --home-eyebrow-size: 11px;
+  --home-verse-ref-size: 14px;
+  --home-verse-size: 15px;
+  --home-body-size: 15px;
+  --home-link-size: 14px;
+  --home-section-title-size: 15px;
   --home-journey-icon-size: 38px;
   --home-journey-emoji-size: 20px;
-  --home-journey-title-size: 13px;
+  --home-journey-title-size: 15px;
   --home-era-header-gap: 14px;
-  --home-era-heading-size: 15px;
+  --home-era-heading-size: 17px;
   --home-era-gap: 12px;
   --home-era-card-width: 188px;
   --home-era-card-padding: 14px;
   --home-era-icon-size: 34px;
   --home-era-icon-font-size: 15px;
-  --home-era-period-size: 8px;
+  --home-era-period-size: 10px;
   --home-era-period-width: 90px;
-  --home-era-title-size: 12px;
-  --home-era-subtitle-size: 10px;
-  --home-era-body-size: 10px;
-  --home-era-footer-size: 9px;
+  --home-era-title-size: 14px;
+  --home-era-subtitle-size: 12px;
+  --home-era-body-size: 12px;
+  --home-era-footer-size: 11px;
 }
 
 @media (min-width: 900px) {
@@ -278,35 +319,35 @@ input, textarea {
     --home-title-size: 40px;
     --home-avatar-size: 76px;
     --home-greeting-size: 18px;
-    --home-meta-size: 13px;
+    --home-meta-size: 14px;
     --streak-badge-gap: 7px;
     --streak-badge-padding: 7px 14px;
-    --streak-badge-font-size: 13px;
+    --streak-badge-font-size: 14px;
     --home-section-gap: 24px;
     --home-card-padding: 28px;
     --home-compact-card-padding: 20px 22px;
-    --home-eyebrow-size: 12px;
-    --home-verse-ref-size: 14px;
-    --home-verse-size: 18px;
-    --home-body-size: 17px;
-    --home-link-size: 15px;
-    --home-section-title-size: 18px;
+    --home-eyebrow-size: 13px;
+    --home-verse-ref-size: 15px;
+    --home-verse-size: 19px;
+    --home-body-size: 18px;
+    --home-link-size: 16px;
+    --home-section-title-size: 19px;
     --home-journey-icon-size: 56px;
     --home-journey-emoji-size: 28px;
-    --home-journey-title-size: 17px;
+    --home-journey-title-size: 18px;
     --home-era-header-gap: 18px;
-    --home-era-heading-size: 20px;
+    --home-era-heading-size: 22px;
     --home-era-gap: 16px;
     --home-era-card-width: 248px;
     --home-era-card-padding: 20px;
     --home-era-icon-size: 48px;
     --home-era-icon-font-size: 21px;
-    --home-era-period-size: 10px;
+    --home-era-period-size: 11px;
     --home-era-period-width: 118px;
-    --home-era-title-size: 16px;
-    --home-era-subtitle-size: 13px;
-    --home-era-body-size: 13px;
-    --home-era-footer-size: 11px;
+    --home-era-title-size: 17px;
+    --home-era-subtitle-size: 14px;
+    --home-era-body-size: 14px;
+    --home-era-footer-size: 12px;
   }
 }
 
@@ -352,7 +393,7 @@ input, textarea {
 .app-nav-label {
   display: none;
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1;
 }

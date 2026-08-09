@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(js|json\\)$\")",
+      "Bash(npx web-push *)",
+      "PowerShell(Set-Location \"c:\\\\Users\\\\carol\\\\zakar-app\"; git add next.config.ts package-lock.json package.json public/manifest.json src/app/\\(app\\)/layout.tsx src/app/api/push/ src/components/perfil/ src/components/pwa/ src/lib/hooks/ sw-push.js)"
+    ]
+  }
+}

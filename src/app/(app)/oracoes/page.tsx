@@ -27,10 +27,10 @@ export default async function OracoesPage() {
     <div className="page-enter" style={{ paddingBottom: 80 }}>
       {/* Header */}
       <div style={{ padding: '16px 16px 20px' }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
           Momento de paz
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, color: 'var(--text-primary)' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
           Orações
         </div>
       </div>

@@ -5,7 +5,7 @@ export default function TimelinePage() {
     <div className="page-enter" style={{ padding: '24px 16px', paddingBottom: '100px' }}>
       <div style={{
         fontFamily: 'var(--font-mono)',
-        fontSize: '10px',
+        fontSize: 'var(--font-size-xs)',
         color: 'var(--text-muted)',
         textTransform: 'uppercase',
         letterSpacing: '0.1em',
@@ -15,7 +15,7 @@ export default function TimelinePage() {
       </div>
       <h1 style={{
         fontFamily: 'var(--font-display)',
-        fontSize: '26px',
+        fontSize: 'var(--font-size-xl)',
         fontWeight: 700,
         color: 'var(--text-primary)',
         marginBottom: '6px',
@@ -24,7 +24,7 @@ export default function TimelinePage() {
       </h1>
       <p style={{
         fontFamily: 'var(--font-body)',
-        fontSize: '14px',
+        fontSize: 'var(--font-size-sm)',
         color: 'var(--text-muted)',
         marginBottom: '28px',
       }}>
@@ -68,7 +68,7 @@ export default function TimelinePage() {
               <div style={{ marginBottom: '8px' }}>
                 <p style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: '13px',
+                  fontSize: 'var(--font-size-sm)',
                   fontWeight: 600,
                   color: 'var(--text-primary)',
                   marginBottom: '2px',
@@ -77,7 +77,7 @@ export default function TimelinePage() {
                 </p>
                 <p style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '10px',
+                  fontSize: 'var(--font-size-xs)',
                   color: era.color,
                   marginBottom: '4px',
                 }}>
@@ -85,7 +85,7 @@ export default function TimelinePage() {
                 </p>
                 <p style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: '11px',
+                  fontSize: 'var(--font-size-xs)',
                   color: 'var(--text-muted)',
                   lineHeight: 1.5,
                   marginBottom: era.events.length > 0 ? '10px' : 0,
@@ -107,7 +107,7 @@ export default function TimelinePage() {
                     <div key={j} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                       <div style={{
                         fontFamily: 'var(--font-mono)',
-                        fontSize: '9px',
+                        fontSize: 'var(--font-size-xs)',
                         color: era.color,
                         flexShrink: 0,
                         minWidth: '72px',
@@ -117,7 +117,7 @@ export default function TimelinePage() {
                       </div>
                       <div style={{
                         fontFamily: 'var(--font-body)',
-                        fontSize: '11px',
+                        fontSize: 'var(--font-size-xs)',
                         color: 'var(--text-secondary)',
                         lineHeight: 1.4,
                       }}>

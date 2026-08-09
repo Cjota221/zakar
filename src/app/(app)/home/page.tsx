@@ -11,6 +11,7 @@ import { UserAvatar } from '@/components/ui/UserAvatar'
 import { ShareVerse } from '@/components/biblia/ShareVerse'
 import { EraCards } from '@/components/study/EraCards'
 import { DailyPsalmCard } from '@/components/home/DailyPsalmCard'
+import { DevocionalFallback } from '@/components/home/DevocionalFallback'
 
 type JourneyProgressWithJourney = {
   journeys?: {
@@ -123,74 +124,7 @@ export default async function HomePage() {
             </span>
           </div>
 
-          {devotional ? (
-            <>
-              {/* Versículo */}
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--home-verse-ref-size)',
-                color: 'var(--text-muted)',
-                marginBottom: '8px',
-              }}>
-                {devotional.verse_reference}
-              </p>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--home-verse-size)',
-                fontStyle: 'italic',
-                color: '#CBD5E1',
-                lineHeight: 1.6,
-                marginBottom: '16px',
-              }}>
-                &ldquo;{devotional.verse_text}&rdquo;
-              </p>
-
-              {/* Palavra gerada */}
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--home-body-size)',
-                color: 'var(--text-secondary)',
-                lineHeight: 1.7,
-                marginBottom: '20px',
-                display: '-webkit-box',
-                WebkitLineClamp: 4,
-                WebkitBoxOrient: 'vertical' as const,
-                overflow: 'hidden',
-              }}>
-                {devotional.content}
-              </p>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <Link
-                  href={`/home/devocional/${devotional.id}`}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 'var(--home-link-size)',
-                    fontWeight: 600,
-                    color: 'var(--gold)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                    textDecoration: 'none',
-                  }}
-                >
-                  Ler completo <ArrowRight size={14} />
-                </Link>
-                {devotional.verse_reference && devotional.verse_text && (
-                  <ShareVerse
-                    verseReference={devotional.verse_reference}
-                    verseText={devotional.verse_text}
-                  />
-                )}
-              </div>
-            </>
-          ) : (
-            <DevocionalSkeleton />
-          )}
+          <DevocionalFallback initialDevotional={devotional} />
         </Card>
       </div>
 
@@ -306,16 +240,3 @@ export default async function HomePage() {
   )
 }
 
-function DevocionalSkeleton() {
-  return (
-    <div>
-      <div className="skeleton" style={{ height: '11px', width: '30%', marginBottom: '8px' }} />
-      <div className="skeleton" style={{ height: '13px', width: '100%', marginBottom: '4px' }} />
-      <div className="skeleton" style={{ height: '13px', width: '80%', marginBottom: '16px' }} />
-      <div className="skeleton" style={{ height: '13px', width: '100%', marginBottom: '4px' }} />
-      <div className="skeleton" style={{ height: '13px', width: '90%', marginBottom: '4px' }} />
-      <div className="skeleton" style={{ height: '13px', width: '60%', marginBottom: '16px' }} />
-      <div className="skeleton" style={{ height: '12px', width: '25%' }} />
-    </div>
-  )
-}

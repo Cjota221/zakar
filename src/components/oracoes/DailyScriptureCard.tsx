@@ -36,13 +36,13 @@ export function DailyScriptureCard({ type, number, label, badge, href }: Props) 
           <BookOpen size={20} color={c.accent} weight="fill" />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: c.accent, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: c.accent, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>
             {badge}
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
             {label}
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-muted)' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
             Toque para ler
           </div>
         </div>

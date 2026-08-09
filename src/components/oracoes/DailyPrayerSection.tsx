@@ -42,7 +42,7 @@ export function DailyPrayerSection({ initialPrayer }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <HandsPraying size={16} color="var(--gold)" weight="fill" />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Oração do Dia
             </span>
           </div>
@@ -53,7 +53,7 @@ export function DailyPrayerSection({ initialPrayer }: Props) {
               display: 'flex', alignItems: 'center', gap: 4,
               background: 'none', border: '1px solid var(--border-default)', borderRadius: 8,
               padding: '4px 8px', cursor: loading ? 'not-allowed' : 'pointer',
-              fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)',
               opacity: loading ? 0.6 : 1,
             }}
           >
@@ -66,11 +66,11 @@ export function DailyPrayerSection({ initialPrayer }: Props) {
           <>
             {prayer.verse_reference && (
               <div style={{ marginBottom: 14, padding: '10px 12px', background: 'rgba(212,175,55,0.07)', borderRadius: 10 }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--gold)', marginBottom: 4 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--gold)', marginBottom: 4 }}>
                   {prayer.verse_reference}
                 </div>
                 {prayer.verse_text && (
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontStyle: 'italic', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', fontStyle: 'italic', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
                     &ldquo;{prayer.verse_text}&rdquo;
                   </p>
                 )}
@@ -82,7 +82,7 @@ export function DailyPrayerSection({ initialPrayer }: Props) {
           </>
         ) : (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 14 }}>
               Sua oração personalizada para hoje ainda não foi gerada.
             </p>
             <button
@@ -90,7 +90,7 @@ export function DailyPrayerSection({ initialPrayer }: Props) {
               disabled={loading}
               style={{
                 background: 'var(--gold)', color: '#0F172A',
-                fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700,
+                fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-sm)', fontWeight: 700,
                 border: 'none', borderRadius: 12, padding: '11px 20px',
                 cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
               }}

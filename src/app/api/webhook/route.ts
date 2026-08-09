@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-webhook-secret')
 
-  if (secret !== process.env.WEBHOOK_SECRET) {
+  if (secret !== process.env.N8N_WEBHOOK_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

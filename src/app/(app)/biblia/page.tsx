@@ -5,10 +5,12 @@ import { CaretLeft, CaretRight, MagnifyingGlass, X, ArrowLeft, ClockCounterClock
 import { fetchBookIndex, fetchBook, BOOK_GROUPS, type BookMeta, type BibleBook } from '@/lib/bible'
 import { BibleTimeline } from '@/components/biblia/BibleTimeline'
 import { getEraForBook } from '@/lib/bible/timeline'
+import { useSearchParams } from 'next/navigation'
 
 type View = 'index' | 'timeline' | 'chapters' | 'reader'
 
 export default function BibliaPage() {
+  const searchParams = useSearchParams()
   const [view, setView] = useState<View>('index')
   const [books, setBooks] = useState<BookMeta[]>([])
   const [selectedBook, setSelectedBook] = useState<BookMeta | null>(null)
@@ -18,6 +20,7 @@ export default function BibliaPage() {
   const [loading, setLoading] = useState(true)
   const [loadingChapter, setLoadingChapter] = useState(false)
   const verseRefs = useRef<(HTMLParagraphElement | null)[]>([])
+  const initializedRef = useRef(false)
 
   useEffect(() => {
     fetchBookIndex().then(data => {
@@ -25,6 +28,37 @@ export default function BibliaPage() {
       setLoading(false)
     })
   }, [])
+
+  // "Ler no contexto" — abrir livro/capítulo/versículo das query params
+  useEffect(() => {
+    if (initializedRef.current || loading || books.length === 0) return
+    const livro = searchParams.get('livro')
+    const capitulo = searchParams.get('capitulo')
+    const versiculo = searchParams.get('versiculo')
+    if (livro && capitulo) {
+      const book = books.find(b => b.abbrev === livro || b.name.toLowerCase() === livro.toLowerCase())
+      if (book) {
+        const ch = parseInt(capitulo) - 1
+        if (ch >= 0 && ch < book.chapters) {
+          initializedRef.current = true
+          // Usar queueMicrotask para evitar setState síncrono no effect
+          queueMicrotask(() => {
+            setSelectedBook(book)
+            setView('chapters')
+            setTimeout(() => {
+              openChapter(ch)
+              if (versiculo) {
+                setTimeout(() => {
+                  const el = verseRefs.current[parseInt(versiculo) - 1]
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                }, 300)
+              }
+            }, 100)
+          })
+        }
+      }
+    }
+  }, [loading, books, searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function openBook(book: BookMeta) {
     setSelectedBook(book)
@@ -164,7 +198,7 @@ export default function BibliaPage() {
             >
               <CaretLeft size={14} /> Anterior
             </button>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
               {selectedChapter + 1} / {selectedBook.chapters}
             </span>
             <button
@@ -213,7 +247,7 @@ export default function BibliaPage() {
                 <div key={group.label} style={{ marginBottom: '24px' }}>
                   <p style={{
                     fontFamily: 'var(--font-mono)',
-                    fontSize: '9px',
+                    fontSize: 'var(--font-size-xs)',
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                     color: 'var(--text-muted)',
@@ -249,7 +283,7 @@ export default function BibliaPage() {
           {/* Abbrev decorativo */}
           <p style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: '11px',
+            fontSize: 'var(--font-size-xs)',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
             color: 'var(--gold)',
@@ -290,14 +324,14 @@ export default function BibliaPage() {
               >
                 <ClockCounterClockwise size={16} color={era.color} weight="bold" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 600, color: era.color }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-xs)', fontWeight: 600, color: era.color }}>
                     {era.era}
                   </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '1px' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '1px' }}>
                     {era.period} · Ver linha do tempo
                   </div>
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-muted)' }}>›</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>›</span>
               </button>
             )
           })()}
@@ -337,7 +371,7 @@ export default function BibliaPage() {
                 </span>
                 <span style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: '9px',
+                  fontSize: 'var(--font-size-xs)',
                   color: 'var(--text-muted)',
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase',

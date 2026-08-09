@@ -64,13 +64,13 @@ export default async function PerfilPage() {
         />
         <StatCard
           label="Nível"
-          value={<span style={{ fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>{levelNames[profile.level]}</span>}
+          value={<span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--font-size-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{levelNames[profile.level]}</span>}
         />
       </div>
 
       {/* Tema */}
       <div style={{ marginBottom: '24px' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px' }}>
           Aparência
         </p>
         <ThemeToggle />
@@ -103,7 +103,7 @@ function StatCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Card padding="12px" style={{ textAlign: 'center' }}>
       <div style={{ marginBottom: '6px' }}>{value}</div>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: 'var(--text-muted)' }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{label}</p>
     </Card>
   )
 }
